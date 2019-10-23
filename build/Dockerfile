@@ -11,12 +11,14 @@ WORKDIR /golang/src/app/xerox
 
 COPY . .
 
+ARG GOOS
+ARG GOARCH
+
 RUN dep ensure
 
 RUN make build
 
 FROM scratch
-ARG GOOS
-ARG GOARCH
+
 COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} go-xerox-upload-${GOOS}_${GOARCH}
-ENTRYPOINT ["./go-upload-xerox-linux_amd64"]
+ENTRYPOINT ["./go-upload-xerox-${GOOS}_${GOARCH}"]
