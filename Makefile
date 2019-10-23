@@ -73,6 +73,9 @@ docker_build:
 		-f $(DOCKERFILES)/Dockerfile \
 		./
 
+docker_run:
+	@docker run -v $(shell pwd)/files:/tmp -p 8080:10000 $(REGISTRY)/$(APP_NAME):$(BUILD_TAG)
+
 #docker_push:
 #	set -e; \
 #	docker tag $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) $(REGISTRY)/$(APP_NAME):$(IMAGE_TAG) ; \
