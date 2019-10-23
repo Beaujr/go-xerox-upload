@@ -96,7 +96,7 @@ func (x *Xerox) MakeDirectory(directory string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Chown(fmt.Sprintf("%s/%s", directory), 1000, 1000); err != nil {
+	if err := os.Chown(directory, 1000, 1000); err != nil {
 		return err
 	}
 	return nil
