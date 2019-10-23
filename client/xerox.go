@@ -59,10 +59,16 @@ func (x *Xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
 	// write this byte array to our temporary file
 	tempFile.Write(fileBytes)
 	os.Rename(tempFile.Name(), fmt.Sprintf("%s/%s", directory, filename))
-	if err := os.Chmod(fmt.Sprintf("%s/%s", directory, filename), 0777); err != nil {
+	if err := os.Chmod(fmt.Sprintf("%s/%s", directory, filename), 0700); err != nil {
 		fmt.Println(err)
 		return []byte(XRXERROR), err
 	}
+
+	if err := os.Chown(fmt.Sprintf("%s/%s", directory, filename), 1000, 1000); err != nil {
+		fmt.Println(err)
+		return []byte(XRXERROR), err
+	}
+
 
 	return nil, nil
 }
@@ -86,16 +92,18 @@ func (x *Xerox) ListDirectory(directory string) (string, error) {
 }
 
 func (x *Xerox) MakeDirectory(directory string) error {
-	err := os.Mkdir(directory, 0777)
+	err := os.Mkdir(directory, 0700)
 	if err != nil {
 		return err
 	}
-
+	if err := os.Chown(fmt.Sprintf("%s/%s", directory), 1000, 1000); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (x *Xerox) DeleteDir(directory string) error {
-	err := os.Mkdir(directory, 0777)
+	err := os.Remove(directory)
 	if err != nil {
 		return err
 	}
@@ -113,4 +121,15 @@ func (x *Xerox) CleanPath(directory string) string {
 	}
 
 	return directory
+}
+
+func getEnvVar(name string) (string, error) {
+	v, found := os.LookupEnv(name)
+	if !found {
+		return "", fmt.Errorf("%s must be set", name)
+	}
+	if len(v) == 0 {
+		return "", fmt.Errorf("%s must not be empty", name)
+	}
+	return v, nil
 }

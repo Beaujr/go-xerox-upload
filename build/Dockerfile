@@ -24,3 +24,7 @@ FROM scratch
 
 COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-xerox-upload go-xerox-upload
 ENTRYPOINT ["./go-xerox-upload"]
+ARG VCS_REF
+LABEL org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/beaujr/go-xerox-upload" \
+      org.label-schema.license="Apache-2.0"
