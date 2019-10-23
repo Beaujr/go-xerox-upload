@@ -16,5 +16,7 @@ RUN dep ensure
 RUN make build
 
 FROM scratch
-COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-upload-xerox-linux_amd64 go-upload-xerox-linux_amd64
+ARG GOOS
+ARG GOARCH
+COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} go-xerox-upload-${GOOS}_${GOARCH}
 ENTRYPOINT ["./go-upload-xerox-linux_amd64"]

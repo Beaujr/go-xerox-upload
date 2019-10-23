@@ -67,6 +67,8 @@ go_fmt:
 docker_build:
 	docker build \
 		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg GOARCH=$(GOARCH) \
+		--build-arg GOOS=$(GOOS) \
 		-t $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) \
 		-f $(DOCKERFILES)/Dockerfile \
 		./
