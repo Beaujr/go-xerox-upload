@@ -1,20 +1,19 @@
-PACKAGE_NAME := github.com/beaujr/go-upload-xerox
-REGISTRY := docker.com/
-APP_NAME := beaujr/go-upload-xerox
+PACKAGE_NAME := github.com/beaujr/go-xerox-upload
+REGISTRY := docker.com
+APP_NAME := beaujr/go-xerox-upload
 IMAGE_TAG ?= 0.1
 GOPATH ?= $HOME/go
-HACK_DIR ?= hack
 BUILD_TAG := build
 BINPATH := ./bin
 NAMESPACE := default
 
 # Path to dockerfiles directory
-DOCKERFILES := $(HACK_DIR)/build
+DOCKERFILES := build
 
 # Go build flags
 GOOS := linux
 GOARCH := amd64
-GIT_COMMIT := ABC
+GIT_COMMIT := $(shell git rev-parse HEAD)
 GOLDFLAGS := -ldflags "-X $(PACKAGE_NAME)/pkg/util.AppGitCommit=${GIT_COMMIT} -X $(PACKAGE_NAME)/pkg/util.AppVersion=${IMAGE_TAG}"
 
 .PHONY: verify build docker_build push generate generate_verify \

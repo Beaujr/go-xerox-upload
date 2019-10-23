@@ -18,11 +18,3 @@ RUN make build
 FROM scratch
 COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-upload-xerox-linux_amd64 go-upload-xerox-linux_amd64
 ENTRYPOINT ["./go-upload-xerox-linux_amd64"]
-
-
-
-git init
-git add README.md
-git commit -m "first commit"
-git remote add origin git@github.com:Beaujr/go-xerox-upload.git
-git push -u origin master

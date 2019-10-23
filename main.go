@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
-	xclient "./client"
+	xclient "github.com/beaujr/go-xerox-upload/client"
 )
 
 func handleRequests() {
@@ -32,10 +32,12 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 	directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))
 
-	fmt.Println(fmt.Sprintf("Endpoint Hit: %s", xclient.Operation))
+	operation := r.PostForm[xclient.Operation]
+
+	fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
 
 
-	switch strings.Join(r.PostForm[xclient.Operation], "") {
+	switch strings.Join(operation, "") {
 	case xclient.ListDirectory:
 		items, err := x.ListDirectory(directory)
 		if err != nil {
@@ -69,8 +71,9 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	case xclient.DeleteFile:
 		//   XRXNOTFOUND if the requested file isn't found.
 		//   XRXERROR the file cannot be deleted.
-		filename := strings.Join(r.PostForm[xclient.DestName], "")
-		if strings.Join(r.PostForm[xclient.DestName], "") != "" {
+		destinationName := r.PostForm[xclient.DestName]
+		filename := strings.Join(destinationName, "")
+		if strings.Join(destinationName, "") != "" {
 			directory = fmt.Sprintf("%s%s", directory, filename)
 		}
 		err := os.Remove(directory)
