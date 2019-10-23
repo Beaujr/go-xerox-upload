@@ -18,8 +18,9 @@ RUN dep ensure
 
 RUN make build GOOS=${GOOS} GOARCH=${GOARCH}
 
+RUN mv bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} bin/beaujr/go-xerox-upload
+
 FROM scratch
-ARG GOOS
-ARG GOARCH
-COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} go-xerox-upload-${GOOS}_${GOARCH}
-ENTRYPOINT ["./go-upload-xerox-${GOOS}_${GOARCH}"]
+
+COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-xerox-upload go-xerox-upload
+ENTRYPOINT ["./go-xerox-upload"]
