@@ -1,12 +1,13 @@
 package client
 
 import (
-	"net/http"
-	"strings"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"strings"
 )
+
 const ListDirectory = "ListDir"
 const MakeDir = "MakeDir"
 const PutFile = "PutFile"
@@ -31,6 +32,8 @@ type XeroxApi interface {
 }
 
 type Xerox struct {
+	PGID int
+	GID  int
 }
 
 func (x *Xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
@@ -64,16 +67,13 @@ func (x *Xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
 		return []byte(XRXERROR), err
 	}
 
-	if err := os.Chown(fmt.Sprintf("%s/%s", directory, filename), 1000, 1000); err != nil {
+	if err := os.Chown(fmt.Sprintf("%s/%s", directory, filename), x.PGID, x.GID); err != nil {
 		fmt.Println(err)
 		return []byte(XRXERROR), err
 	}
 
-
 	return nil, nil
 }
-
-
 
 func (x *Xerox) ListDirectory(directory string) (string, error) {
 	file, err := os.Open(directory)
@@ -96,7 +96,7 @@ func (x *Xerox) MakeDirectory(directory string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Chown(directory, 1000, 1000); err != nil {
+	if err := os.Chown(directory, x.PGID, x.GID); err != nil {
 		return err
 	}
 	return nil
@@ -121,15 +121,4 @@ func (x *Xerox) CleanPath(directory string) string {
 	}
 
 	return directory
-}
-
-func getEnvVar(name string) (string, error) {
-	v, found := os.LookupEnv(name)
-	if !found {
-		return "", fmt.Errorf("%s must be set", name)
-	}
-	if len(v) == 0 {
-		return "", fmt.Errorf("%s must not be empty", name)
-	}
-	return v, nil
 }

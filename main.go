@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	xclient "github.com/beaujr/go-xerox-upload/client"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"syscall"
-	xclient "github.com/beaujr/go-xerox-upload/client"
 )
 
 func handleRequests() {
@@ -22,20 +23,37 @@ func main() {
 	handleRequests()
 }
 
-
-
 func upload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	r.ParseMultipartForm(32 << 20)
 
-	x := xclient.Xerox{}
+	PGID, err := getEnvVar("PGID")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	USER_ID, err := strconv.Atoi(PGID)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	GID, err := getEnvVar("GID")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	GROUP_IP, err := strconv.Atoi(GID)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	x := xclient.Xerox{USER_ID, GROUP_IP}
 
 	directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))
 
 	operation := r.PostForm[xclient.Operation]
 
 	fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
-
 
 	switch strings.Join(operation, "") {
 	case xclient.ListDirectory:
@@ -100,4 +118,15 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func getEnvVar(name string) (string, error) {
+	v, found := os.LookupEnv(name)
+	if !found {
+		return "", fmt.Errorf("%s must be set", name)
+	}
+	if len(v) == 0 {
+		return "", fmt.Errorf("%s must not be empty", name)
+	}
+	return v, nil
 }
