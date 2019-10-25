@@ -79,7 +79,7 @@ docker_run:
 docker_push: docker-login
 	set -e; \
 	docker tag $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) $(APP_NAME):$(IMAGE_TAG)-$(GOARCH)-$(GIT_COMMIT) ; \
-	docker push $(APP_NAME):$(IMAGE_TAG);
+	docker push $(APP_NAME):$(IMAGE_TAG)-$(GOARCH)-$(GIT_COMMIT);
 
 check-docker-credentials:
 ifndef DOCKER_USER
