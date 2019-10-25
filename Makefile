@@ -1,5 +1,5 @@
 PACKAGE_NAME := github.com/beaujr/go-xerox-upload
-REGISTRY := docker.com
+REGISTRY := docker.io
 APP_NAME := beaujr/go-xerox-upload
 IMAGE_TAG ?= 0.1
 GOPATH ?= $HOME/go
@@ -76,8 +76,19 @@ docker_build:
 docker_run:
 	@docker run -v $(shell pwd)/files:/tmp -p 8080:10000 $(REGISTRY)/$(APP_NAME):$(BUILD_TAG)
 
-#docker_push:
-#	set -e; \
-#	docker tag $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) $(REGISTRY)/$(APP_NAME):$(IMAGE_TAG) ; \
-#	docker push $(REGISTRY)/$(APP_NAME):$(IMAGE_TAG);
-#
+docker_push: docker-login
+	set -e; \
+	docker tag $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) $(APP_NAME):$(IMAGE_TAG)-$(GOARCH)-$(GIT_COMMIT) ; \
+	docker push $(APP_NAME):$(IMAGE_TAG);
+
+check-docker-credentials:
+ifndef DOCKER_USER
+	$(error DOCKER_USER is undefined)
+else
+  ifndef DOCKER_PASS
+	$(error DOCKER_PASS is undefined)
+  endif
+endif
+
+docker-login: check-docker-credentials
+	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS) $(REGISTRY)
