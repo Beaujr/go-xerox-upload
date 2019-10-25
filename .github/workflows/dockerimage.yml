@@ -12,5 +12,9 @@ jobs:
     - uses: actions/checkout@v1
     - name: Build the Docker image
       run: make docker_build
-    - name: Build the Docker image
+    - name: Push the Docker image
       run: make docker_push DOCKER_USER=${{ secrets.DOCKER_USER }} DOCKER_PASS=${{ secrets.DOCKER_PASS }}
+    - name: Build the ARM Docker image
+      run: make docker_build GOARCH=arm
+    - name: Push the Docker image
+      run: make docker_push DOCKER_USER=${{ secrets.DOCKER_USER }} DOCKER_PASS=${{ secrets.DOCKER_PASS }} GOARCH=arm
