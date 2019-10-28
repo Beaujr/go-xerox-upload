@@ -119,7 +119,7 @@ func findDir(service *drive.Service, name string, parentId string) (string, erro
 func createDir(service *drive.Service, name string, parentId string) (*drive.File, error) {
 	d := &drive.File{
 		Name:     name,
-		MimeType: "application/vnd.googleClient-apps.folder",
+		MimeType: "application/vnd.google-apps.folder",
 		Parents:  []string{parentId},
 	}
 
