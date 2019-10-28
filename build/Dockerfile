@@ -3,11 +3,11 @@ FROM golang:1.13.3-alpine3.10 as builder
 RUN apk update && apk add curl make git gcc cmake g++
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-RUN mkdir -p /golang/src/app/xerox
+RUN mkdir -p /go/src/github.com/beaujr/go-xerox-upload
 
-ENV GOPATH=/golang/
+ENV GOPATH=/go
 
-WORKDIR /golang/src/app/xerox
+WORKDIR /go/src/github.com/beaujr/go-xerox-upload
 
 COPY . .
 
@@ -22,7 +22,7 @@ RUN mv bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} bin/beaujr/go-xerox-upload
 
 FROM scratch
 
-COPY --from=builder /golang/src/app/xerox/bin/beaujr/go-xerox-upload go-xerox-upload
+COPY --from=builder /go/src/github.com/beaujr/go-xerox-upload/bin/beaujr/go-xerox-upload go-xerox-upload
 ENTRYPOINT ["./go-xerox-upload"]
 ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF \

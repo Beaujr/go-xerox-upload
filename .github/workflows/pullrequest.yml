@@ -1,0 +1,16 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    branches:
+    - 'master'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: make docker_build
+    - name: Build the ARM Docker image
+      run: make docker_build GOARCH=arm
