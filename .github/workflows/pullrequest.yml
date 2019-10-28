@@ -1,0 +1,20 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    branches:
+    - 'master'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: make docker_build
+    - name: Push the Docker image
+      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }}
+    - name: Build the ARM Docker image
+      run: make docker_build GOARCH=arm
+    - name: Push the ARM Docker image
+      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GOARCH=arm
