@@ -50,7 +50,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	_, found := os.LookupEnv("google")
 	var x xclient.XeroxApi
 
-	if found{
+	if found {
 		x, err = xclient.NewGoogleClient(userId, groupIp)
 		if err != nil {
 			log.Println(err.Error())

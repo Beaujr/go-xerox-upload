@@ -1,15 +1,16 @@
 package client
 
 import (
-	"net/http"
-	"strings"
 	"fmt"
-	"os"
 	"google.golang.org/api/drive/v3"
+	"net/http"
+	"os"
+	"strings"
 )
+
 type googleClient struct {
-	PGID int
-	GID  int
+	PGID    int
+	GID     int
 	service *drive.Service
 }
 
@@ -19,11 +20,9 @@ func NewGoogleClient(pgId int, gId int) (*googleClient, error) {
 		return nil, err
 	}
 
-	googleClient := googleClient{PGID:pgId, GID:gId, service: service}
+	googleClient := googleClient{PGID: pgId, GID: gId, service: service}
 	return &googleClient, nil
 }
-
-
 
 func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, error) {
 	file, _, err := r.FormFile(Sendfile)
@@ -69,7 +68,7 @@ func (google *googleClient) MakeDirectory(directory string) error {
 	root := "root"
 	for _, dir := range directories {
 		if dir == "" {
-			continue;
+			continue
 		}
 		folderId, err := findDir(google.service, dir, root)
 		if err != nil {
@@ -94,7 +93,7 @@ func (google *googleClient) FindDir(directory string) (string, error) {
 	root := "root"
 	for _, dir := range directories {
 		if dir == "" {
-			continue;
+			continue
 		}
 		folderId, err := findDir(google.service, dir, root)
 		if err != nil {
@@ -114,7 +113,6 @@ func (google *googleClient) FindDir(directory string) (string, error) {
 
 	return root, nil
 }
-
 
 func (google *googleClient) DeleteDir(directory string) error {
 	err := os.Remove(directory)
