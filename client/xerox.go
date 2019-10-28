@@ -32,12 +32,18 @@ type XeroxApi interface {
 	MakeDirectory(directory string) error
 }
 
-type Xerox struct {
+type xerox struct {
+	XeroxApi
 	PGID int
 	GID  int
 }
 
-func (x *Xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
+func NewFileSystemClient(pgId int, gId int) XeroxApi {
+	fsClient := xerox{PGID: pgId, GID: gId}
+	return &fsClient
+}
+
+func (x *xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
 	file, _, err := r.FormFile(Sendfile)
 	if err != nil {
 		return []byte(XRXERROR), err
@@ -76,7 +82,7 @@ func (x *Xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
 	return nil, nil
 }
 
-func (x *Xerox) ListDirectory(directory string) (string, error) {
+func (x *xerox) ListDirectory(directory string) (string, error) {
 	file, err := os.Open(directory)
 	if err != nil {
 		return "", err
@@ -92,7 +98,7 @@ func (x *Xerox) ListDirectory(directory string) (string, error) {
 	return directoryItems, nil
 }
 
-func (x *Xerox) MakeDirectory(directory string) error {
+func (x *xerox) MakeDirectory(directory string) error {
 	err := os.Mkdir(directory, 0700)
 	if err != nil {
 		return err
@@ -103,7 +109,7 @@ func (x *Xerox) MakeDirectory(directory string) error {
 	return nil
 }
 
-func (x *Xerox) DeleteDir(directory string) error {
+func (x *xerox) DeleteDir(directory string) error {
 	err := os.Remove(directory)
 	if err != nil {
 		return err
@@ -112,7 +118,7 @@ func (x *Xerox) DeleteDir(directory string) error {
 	return nil
 }
 
-func (x *Xerox) CleanPath(directory string) string {
+func (x *xerox) CleanPath(directory string) string {
 	if strings.Index(directory, "\\") >= 0 {
 		directory = strings.Replace(directory, "\\", "/", -1)
 	}

@@ -58,7 +58,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		x = &xclient.Xerox{PGID: userId, GID: groupIp}
+		x = xclient.NewFileSystemClient(userId, groupIp)
 	}
 
 	directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))

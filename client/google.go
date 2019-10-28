@@ -9,12 +9,13 @@ import (
 )
 
 type googleClient struct {
+	XeroxApi
 	PGID    int
 	GID     int
 	service *drive.Service
 }
 
-func NewGoogleClient(pgId int, gId int) (*googleClient, error) {
+func NewGoogleClient(pgId int, gId int) (XeroxApi, error) {
 	service, err := getService()
 	if err != nil {
 		return nil, err
