@@ -27,27 +27,39 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	r.ParseMultipartForm(32 << 20)
 
-	PGID, err := getEnvVar("PGID")
+	pgId, err := getEnvVar("PGID")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	USER_ID, err := strconv.Atoi(PGID)
+	userId, err := strconv.Atoi(pgId)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	GID, err := getEnvVar("GID")
+	gID, err := getEnvVar("GID")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	GROUP_IP, err := strconv.Atoi(GID)
+	groupIp, err := strconv.Atoi(gID)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	x := xclient.Xerox{USER_ID, GROUP_IP}
+	_, found := os.LookupEnv("google")
+	var x xclient.XeroxApi
+
+	if found{
+		x, err = xclient.NewGoogleClient(userId, groupIp)
+		if err != nil {
+			log.Println(err.Error())
+			w.Write([]byte(xclient.XRXERROR))
+			return
+		}
+	} else {
+		x = &xclient.Xerox{PGID: userId, GID: groupIp}
+	}
 
 	directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))
 

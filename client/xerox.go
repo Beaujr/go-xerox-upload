@@ -29,6 +29,7 @@ type XeroxApi interface {
 	CleanPath(directory string) string
 	DeleteDir(directory string) error
 	PutFile(r *http.Request, directory string) ([]byte, error)
+	MakeDirectory(directory string) error
 }
 
 type Xerox struct {
