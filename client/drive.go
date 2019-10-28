@@ -35,7 +35,7 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 		"authorization code: \n%v\n", authURL)
 
 	var authCode string
-	authCode = "4/sgF7V6MSqw5fNzxKnWP_bRTBvfCs27VUXLyf4mV5XAb6K-543ePwADo"
+	authCode = ""
 	//if _, err := fmt.Scan(&authCode); err != nil {
 	//	log.Fatalf("Unable to read authorization code %v", err)
 	//}
@@ -71,7 +71,7 @@ func saveToken(path string, token *oauth2.Token) {
 }
 
 func getService() (*drive.Service, error) {
-	b, err := ioutil.ReadFile("/Users/beaurudder/Developer/go-upload-xerox/src/github.com/beaujr/go-xerox-upload/credentials.json")
+	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
 		fmt.Printf("Unable to read credentials.json file. Err: %v\n", err)
 		return nil, err
