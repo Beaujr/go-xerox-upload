@@ -14,11 +14,13 @@ type filesystem struct {
 	GID  int
 }
 
+// NewFileSystemClient creates a new UNIX FileSystem client
 func NewFileSystemClient(pgId int, gId int) XeroxApi {
 	fsClient := filesystem{PGID: pgId, GID: gId}
 	return &fsClient
 }
 
+// PutFile is the function to upload a file
 func (x *filesystem) PutFile(r *http.Request, directory string) ([]byte, error) {
 	file, _, err := r.FormFile(Sendfile)
 	if err != nil {
@@ -58,6 +60,7 @@ func (x *filesystem) PutFile(r *http.Request, directory string) ([]byte, error) 
 	return nil, nil
 }
 
+// ListDirectory is the function to list directory
 func (x *filesystem) ListDirectory(directory string) (string, error) {
 	file, err := os.Open(directory)
 	if err != nil {
@@ -74,6 +77,7 @@ func (x *filesystem) ListDirectory(directory string) (string, error) {
 	return directoryItems, nil
 }
 
+// MakeDirectory is the function to mkdir
 func (x *filesystem) MakeDirectory(directory string) error {
 	err := os.Mkdir(directory, 0700)
 	if err != nil {
@@ -85,6 +89,7 @@ func (x *filesystem) MakeDirectory(directory string) error {
 	return nil
 }
 
+// DeleteDir is the function to rm -rf dir
 func (x *filesystem) DeleteDir(directory string) error {
 	err := os.Remove(directory)
 	if err != nil {
@@ -94,6 +99,7 @@ func (x *filesystem) DeleteDir(directory string) error {
 	return nil
 }
 
+// CleanPath is the function to clean the path that the printer sends
 func (x *filesystem) CleanPath(directory string) string {
 	if strings.Index(directory, "\\") >= 0 {
 		directory = strings.Replace(directory, "\\", "/", -1)

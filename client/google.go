@@ -14,6 +14,7 @@ type googleClient struct {
 	service *drive.Service
 }
 
+// NewGoogleClient creates a new Google Drive client
 func NewGoogleClient() (XeroxApi, error) {
 	service, err := getService()
 	if err != nil {
@@ -24,6 +25,7 @@ func NewGoogleClient() (XeroxApi, error) {
 	return &googleClient, nil
 }
 
+// PutFile is the function to upload a file
 func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, error) {
 	file, _, err := r.FormFile(Sendfile)
 	if err != nil {
@@ -48,6 +50,7 @@ func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, 
 	return nil, nil
 }
 
+// ListDirectory is the function to list directory
 func (google *googleClient) ListDirectory(directory string) (string, error) {
 	file, err := os.Open(directory)
 	if err != nil {
@@ -64,6 +67,7 @@ func (google *googleClient) ListDirectory(directory string) (string, error) {
 	return directoryItems, nil
 }
 
+// MakeDirectory is the function to mkdir in google drive
 func (google *googleClient) MakeDirectory(directory string) error {
 	directories := strings.Split(directory, "/")
 	root := "root"
@@ -89,6 +93,7 @@ func (google *googleClient) MakeDirectory(directory string) error {
 	return nil
 }
 
+// FindDir is the function to find dir in Google Drive
 func (google *googleClient) FindDir(directory string) (string, error) {
 	directories := strings.Split(directory, "/")
 	root := "root"
@@ -115,8 +120,13 @@ func (google *googleClient) FindDir(directory string) (string, error) {
 	return root, nil
 }
 
+// DeleteDir is the function to rm -rf dir
 func (google *googleClient) DeleteDir(directory string) error {
-	err := os.Remove(directory)
+	dirId, err := google.FindDir(directory)
+	if err != nil {
+		return err
+	}
+	err = google.service.Files.Delete(dirId).Do()
 	if err != nil {
 		return err
 	}
@@ -124,6 +134,7 @@ func (google *googleClient) DeleteDir(directory string) error {
 	return nil
 }
 
+// CleanPath is the function to clean the path that the printer sends
 func (google *googleClient) CleanPath(directory string) string {
 	if strings.Index(directory, "\\") >= 0 {
 		directory = strings.Replace(directory, "\\", "/", -1)
