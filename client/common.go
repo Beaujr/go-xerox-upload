@@ -1,6 +1,12 @@
 package client
 
-import "net/http"
+import (
+	"net/http"
+	"log"
+	"strconv"
+	"os"
+	"fmt"
+)
 
 // ListDirectory is the Payload value from the Printer to List Directory Values to avoid filename collisions
 const ListDirectory = "ListDir"
@@ -48,4 +54,47 @@ type XeroxApi interface {
 	DeleteDir(directory string) error
 	PutFile(r *http.Request, directory string) ([]byte, error)
 	MakeDirectory(directory string) error
+}
+
+func NewClient () (XeroxApi, error) {
+	_, found := os.LookupEnv("google")
+	if found {
+		gc, err := NewGoogleClient()
+		if err != nil {
+			return nil, err
+		}
+		return gc, nil
+	} else {
+		pgId, err := getEnvVar("PGID")
+		if err != nil {
+			log.Panic(err)
+		}
+
+		userId, err := strconv.Atoi(pgId)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		gID, err := getEnvVar("GID")
+		if err != nil {
+			log.Panic(err)
+		}
+
+		groupIp, err := strconv.Atoi(gID)
+		if err != nil {
+			log.Panic(err)
+		}
+		return NewFileSystemClient(userId, groupIp), nil
+	}
+}
+
+func getEnvVar(name string) (string, error) {
+	v, found := os.LookupEnv(name)
+	if !found {
+		return "", fmt.Errorf("%s must be set", name)
+	}
+	if len(v) == 0 {
+		return "", fmt.Errorf("%s must not be empty", name)
+	}
+	return v, nil
 }

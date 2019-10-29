@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"syscall"
 )
@@ -27,56 +26,22 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	r.ParseMultipartForm(32 << 20)
 
-	_, found := os.LookupEnv("google")
 	var x xclient.XeroxApi
-
-	if found {
-		gc, err := xclient.NewGoogleClient()
-		if err != nil {
-			log.Println(err.Error())
-			w.Write([]byte(xclient.XRXERROR))
-			return
-		}
-		x = gc
-	} else {
-		pgId, err := getEnvVar("PGID")
-		if err != nil {
-			log.Panic(err)
-		}
-
-		userId, err := strconv.Atoi(pgId)
-		if err != nil {
-			log.Panic(err)
-		}
-
-		gID, err := getEnvVar("GID")
-		if err != nil {
-			log.Panic(err)
-		}
-
-		groupIp, err := strconv.Atoi(gID)
-		if err != nil {
-			log.Panic(err)
-		}
-		x = xclient.NewFileSystemClient(userId, groupIp)
+	x, err := xclient.NewClient()
+	if err != nil {
+		log.Println(err.Error())
+		w.Write([]byte(xclient.XRXERROR))
+		return
 	}
 
 	directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))
-
 	operation := r.PostForm[xclient.Operation]
 
 	fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
 
 	switch strings.Join(operation, "") {
 	case xclient.ListDirectory:
-		items, err := x.ListDirectory(directory)
-		if err != nil {
-			log.Println(err.Error())
-			w.Write([]byte(xclient.XRXERROR))
-
-		} else {
-			w.Write([]byte(items))
-		}
+		ListDirectory(x, directory, w, r)
 	case xclient.MakeDir:
 		err := x.MakeDirectory(directory)
 		if err != nil {
@@ -129,16 +94,15 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
 }
 
-func getEnvVar(name string) (string, error) {
-	v, found := os.LookupEnv(name)
-	if !found {
-		return "", fmt.Errorf("%s must be set", name)
+func ListDirectory (x xclient.XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
+	items, err := x.ListDirectory(directory)
+	if err != nil {
+		log.Println(err.Error())
+		w.Write([]byte(xclient.XRXERROR))
+
+	} else {
+		w.Write([]byte(items))
 	}
-	if len(v) == 0 {
-		return "", fmt.Errorf("%s must not be empty", name)
-	}
-	return v, nil
 }
