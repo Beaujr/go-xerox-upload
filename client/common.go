@@ -1,11 +1,10 @@
 package client
 
 import (
-	"net/http"
-	"log"
-	"strconv"
-	"os"
 	"fmt"
+	"net/http"
+	"os"
+	"strconv"
 )
 
 // ListDirectory is the Payload value from the Printer to List Directory Values to avoid filename collisions
@@ -56,36 +55,39 @@ type XeroxApi interface {
 	MakeDirectory(directory string) error
 }
 
-func NewClient () (XeroxApi, error) {
+// NewClient generates a new generic client for uploading
+func NewClient() (XeroxApi, error) {
 	_, found := os.LookupEnv("google")
+	var x XeroxApi
 	if found {
 		gc, err := NewGoogleClient()
 		if err != nil {
 			return nil, err
 		}
-		return gc, nil
+		x = gc
 	} else {
 		pgId, err := getEnvVar("PGID")
 		if err != nil {
-			log.Panic(err)
+			return nil, err
 		}
 
 		userId, err := strconv.Atoi(pgId)
 		if err != nil {
-			log.Panic(err)
+			return nil, err
 		}
 
 		gID, err := getEnvVar("GID")
 		if err != nil {
-			log.Panic(err)
+			return nil, err
 		}
 
 		groupIp, err := strconv.Atoi(gID)
 		if err != nil {
-			log.Panic(err)
+			return nil, err
 		}
-		return NewFileSystemClient(userId, groupIp), nil
+		x = NewFileSystemClient(userId, groupIp)
 	}
+	return x, nil
 }
 
 func getEnvVar(name string) (string, error) {
