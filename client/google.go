@@ -124,6 +124,9 @@ func (google *googleClient) FindDir(directory string) (string, error) {
 func (google *googleClient) DeleteDir(directory string) error {
 	dirId, err := google.FindDir(directory)
 	if err != nil {
+		if strings.Compare(err.Error(), "0 results") == 0 {
+			return nil
+		}
 		return err
 	}
 	err = google.service.Files.Delete(dirId).Do()
