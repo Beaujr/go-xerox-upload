@@ -2,7 +2,7 @@ package client
 
 import "net/http"
 
-// ListDir is the Payload value from the Printer to List Directory Values to avoid filename collisions
+// ListDirectory is the Payload value from the Printer to List Directory Values to avoid filename collisions
 const ListDirectory = "ListDir"
 
 // MakeDir is the Payload value from the Printer to Make a Directory if it doesn't exit
@@ -23,7 +23,7 @@ const DestDir = "destDir"
 // DestName is the Payload value from the Printer for the filename  on the filesystem
 const DestName = "destName"
 
-// DestName is the Payload field from the Printer for the the operation to happen, ListDir, MakeDir etc
+// Operation is the Payload field from the Printer for the the operation to happen, ListDir, MakeDir etc
 const Operation = "theOperation"
 
 // Sendfile is the Payload field from the Printer for the the file itself
