@@ -8,42 +8,20 @@ import (
 	"strings"
 )
 
-const ListDirectory = "ListDir"
-const MakeDir = "MakeDir"
-const PutFile = "PutFile"
-const DeleteFile = "DeleteFile"
-const RemoveDir = "RemoveDir"
-
-const DestDir = "destDir"
-const DestName = "destName"
-const Operation = "theOperation"
-const Sendfile = "sendfile"
-
-const XRXNOTFOUND = "XRXNOTFOUND"
-const XRXERROR = "XRXERROR"
-const XRXDIREXISTS = "XRXDIREXISTS"
-const XRXBADNAME = "XRXBADNAME"
-
-type XeroxApi interface {
-	ListDirectory(directory string) (string, error)
-	CleanPath(directory string) string
-	DeleteDir(directory string) error
-	PutFile(r *http.Request, directory string) ([]byte, error)
-	MakeDirectory(directory string) error
-}
-
-type xerox struct {
+type filesystem struct {
 	XeroxApi
 	PGID int
 	GID  int
 }
 
+// NewFileSystemClient creates a new UNIX FileSystem client
 func NewFileSystemClient(pgId int, gId int) XeroxApi {
-	fsClient := xerox{PGID: pgId, GID: gId}
+	fsClient := filesystem{PGID: pgId, GID: gId}
 	return &fsClient
 }
 
-func (x *xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
+// PutFile is the function to upload a file
+func (x *filesystem) PutFile(r *http.Request, directory string) ([]byte, error) {
 	file, _, err := r.FormFile(Sendfile)
 	if err != nil {
 		return []byte(XRXERROR), err
@@ -82,7 +60,8 @@ func (x *xerox) PutFile(r *http.Request, directory string) ([]byte, error) {
 	return nil, nil
 }
 
-func (x *xerox) ListDirectory(directory string) (string, error) {
+// ListDirectory is the function to list directory
+func (x *filesystem) ListDirectory(directory string) (string, error) {
 	file, err := os.Open(directory)
 	if err != nil {
 		return "", err
@@ -98,7 +77,8 @@ func (x *xerox) ListDirectory(directory string) (string, error) {
 	return directoryItems, nil
 }
 
-func (x *xerox) MakeDirectory(directory string) error {
+// MakeDirectory is the function to mkdir
+func (x *filesystem) MakeDirectory(directory string) error {
 	err := os.Mkdir(directory, 0700)
 	if err != nil {
 		return err
@@ -109,7 +89,8 @@ func (x *xerox) MakeDirectory(directory string) error {
 	return nil
 }
 
-func (x *xerox) DeleteDir(directory string) error {
+// DeleteDir is the function to rm -rf dir
+func (x *filesystem) DeleteDir(directory string) error {
 	err := os.Remove(directory)
 	if err != nil {
 		return err
@@ -118,7 +99,8 @@ func (x *xerox) DeleteDir(directory string) error {
 	return nil
 }
 
-func (x *xerox) CleanPath(directory string) string {
+// CleanPath is the function to clean the path that the printer sends
+func (x *filesystem) CleanPath(directory string) string {
 	if strings.Index(directory, "\\") >= 0 {
 		directory = strings.Replace(directory, "\\", "/", -1)
 	}
