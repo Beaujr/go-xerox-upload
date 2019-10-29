@@ -41,9 +41,9 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 	switch strings.Join(operation, "") {
 	case xclient.ListDirectory:
-		ListDirectory(x, directory, w, r)
+		ListDirectory(x, directory, w)
 	case xclient.MakeDir:
-		MakeDirectory(x, directory, w, r)
+		MakeDirectory(x, directory, w)
 	case xclient.PutFile:
 		message, err := x.PutFile(r, directory)
 		if err != nil {
@@ -52,24 +52,23 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	case xclient.DeleteFile:
 		DeleteFile(x, directory, w, r)
 	case xclient.RemoveDir:
-		RemoveDir(x, directory, w, r)
+		RemoveDir(x, directory, w)
 	}
 }
 
 // ListDirectory handle the list directory command
-func ListDirectory(x xclient.XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
+func ListDirectory(x xclient.XeroxApi, directory string, w http.ResponseWriter) {
 	items, err := x.ListDirectory(directory)
 	if err != nil {
 		log.Println(err.Error())
 		w.Write([]byte(xclient.XRXERROR))
-
 	} else {
 		w.Write([]byte(items))
 	}
 }
 
 // MakeDirectory handle the make directory command
-func MakeDirectory(x xclient.XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
+func MakeDirectory(x xclient.XeroxApi, directory string, w http.ResponseWriter) {
 	err := x.MakeDirectory(directory)
 	if err != nil {
 		//   XRXBADNAME if the name is empty.
@@ -107,7 +106,7 @@ func DeleteFile(x xclient.XeroxApi, directory string, w http.ResponseWriter, r *
 }
 
 // RemoveDir handle the delete folder from FS
-func RemoveDir(x xclient.XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
+func RemoveDir(x xclient.XeroxApi, directory string, w http.ResponseWriter) {
 	//   XRXBADNAME if the requested file isn't of the correct type or the name is empty.
 	//   XRXNOTFOUND if the requested file isn't found.
 	//   XRXERROR the file cannot be deleted.

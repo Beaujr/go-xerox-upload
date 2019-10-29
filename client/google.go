@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"google.golang.org/api/drive/v3"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
@@ -52,17 +51,19 @@ func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, 
 
 // ListDirectory is the function to list directory
 func (google *googleClient) ListDirectory(directory string) (string, error) {
-	file, err := os.Open(directory)
+	folderId, err := google.FindDir(directory)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
-
-	list, _ := file.Readdirnames(0) // 0 to read all files and folders
+	parentQuery := fmt.Sprintf("'%s' in parents", folderId)
+	files, err := google.service.Files.List().Q(parentQuery).Do()
+	if err != nil {
+		return "", err
+	}
 	directoryItems := ""
-	for _, name := range list {
-		fmt.Println(name)
-		directoryItems = fmt.Sprintf("%s\n%s", directoryItems, name)
+	for _, name := range files.Files {
+		fmt.Println(name.Name)
+		directoryItems = fmt.Sprintf("%s\n%s", directoryItems, name.Name)
 	}
 	return directoryItems, nil
 }
