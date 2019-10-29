@@ -27,37 +27,37 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	r.ParseMultipartForm(32 << 20)
 
-	pgId, err := getEnvVar("PGID")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	userId, err := strconv.Atoi(pgId)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	gID, err := getEnvVar("GID")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	groupIp, err := strconv.Atoi(gID)
-	if err != nil {
-		log.Panic(err)
-	}
-
 	_, found := os.LookupEnv("google")
 	var x xclient.XeroxApi
 
 	if found {
-		x, err = xclient.NewGoogleClient(userId, groupIp)
+		gc, err := xclient.NewGoogleClient()
 		if err != nil {
 			log.Println(err.Error())
 			w.Write([]byte(xclient.XRXERROR))
 			return
 		}
+		x = gc
 	} else {
+		pgId, err := getEnvVar("PGID")
+		if err != nil {
+			log.Panic(err)
+		}
+
+		userId, err := strconv.Atoi(pgId)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		gID, err := getEnvVar("GID")
+		if err != nil {
+			log.Panic(err)
+		}
+
+		groupIp, err := strconv.Atoi(gID)
+		if err != nil {
+			log.Panic(err)
+		}
 		x = xclient.NewFileSystemClient(userId, groupIp)
 	}
 

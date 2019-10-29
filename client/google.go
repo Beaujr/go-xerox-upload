@@ -6,22 +6,21 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type googleClient struct {
 	XeroxApi
-	PGID    int
-	GID     int
 	service *drive.Service
 }
 
-func NewGoogleClient(pgId int, gId int) (XeroxApi, error) {
+func NewGoogleClient() (XeroxApi, error) {
 	service, err := getService()
 	if err != nil {
 		return nil, err
 	}
 
-	googleClient := googleClient{PGID: pgId, GID: gId, service: service}
+	googleClient := googleClient{service: service}
 	return &googleClient, nil
 }
 
@@ -32,6 +31,7 @@ func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, 
 	}
 	defer file.Close()
 	filename := strings.Join(r.PostForm[DestName], "")
+	filename = fmt.Sprintf("%s_%s", time.Now().Format("20060102150405"), filename)
 
 	parentId, err := google.FindDir(directory)
 	if err != nil {
