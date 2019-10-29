@@ -95,4 +95,4 @@ docker-login: check-docker-credentials
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS) $(REGISTRY)
 
 score: docker-login
-	docker run -it beaujr/gogitops:0.1-amd64-c38a93c -token=$(GITHUB_TOKEN) -user=Beaujr -query="language:golang+org:beaujr"
+	docker run beaujr/gogitops:0.1-amd64-c38a93c -token=$(GITHUB_TOKEN) -user=Beaujr -query="go-xerox-upload language:golang+org:beaujr"
