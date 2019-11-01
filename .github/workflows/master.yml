@@ -13,8 +13,8 @@ jobs:
     - name: Build the Docker image
       run: make docker_build
     - name: Push the Docker image
-      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }}
+      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GITHUB_HEAD_REF=master
     - name: Build the ARM Docker image
       run: make docker_build GOARCH=arm
     - name: Push the ARM Docker image
-      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GOARCH=arm
+      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GOARCH=arm GITHUB_HEAD_REF=master
