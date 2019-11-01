@@ -15,11 +15,11 @@ import (
 	"time"
 )
 
-type Credentials struct {
-	Contents Installed `json:"installed"`
+type googleCredentials struct {
+	Contents installed `json:"installed"`
 }
 
-type Installed struct {
+type installed struct {
 	ClientID                string   `json:"client_id"`
 	ProjectID               string   `json:"project_id"`
 	AuthURI                 string   `json:"auth_uri"`
@@ -27,13 +27,6 @@ type Installed struct {
 	AuthProviderX509CertURL string   `json:"auth_provider_x509_cert_url"`
 	ClientSecret            string   `json:"client_secret"`
 	RedirectUris            []string `json:"redirect_uris"`
-}
-
-type Token struct {
-	AccessToken  string    `json:"access_token"`
-	TokenType    string    `json:"token_type"`
-	RefreshToken string    `json:"refresh_token"`
-	Expiry       time.Time `json:"expiry"`
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -145,8 +138,8 @@ func getService() (*drive.Service, error) {
 		}
 
 		uris := []string{"urn:ietf:wg:oauth:2.0:oob", "http://localhost"}
-		creds := Credentials{
-			Installed{
+		creds := googleCredentials{
+			installed{
 				ClientID:                clientId,
 				ProjectID:               projectId,
 				AuthURI:                 "https://accounts.google.com/o/oauth2/auth",
