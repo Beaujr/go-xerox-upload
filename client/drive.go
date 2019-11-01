@@ -42,13 +42,15 @@ func getClient(config *oauth2.Config) (*http.Client, error) {
 	// created automatically when the authorization flow completes for the first
 	// time.
 
-	var tok oauth2.Token
+	var tok *oauth2.Token
 	if filename, found := os.LookupEnv("TokenFile"); found {
 		tokFile := filename
-		tok, err := tokenFromFile(tokFile)
+		token, err := tokenFromFile(tokFile)
 		if err != nil {
 			tok = getTokenFromWeb(config)
 			saveToken(tokFile, tok)
+		} else {
+			tok = token
 		}
 	} else if accessToken, found := os.LookupEnv("AccessToken"); found {
 
@@ -72,12 +74,12 @@ func getClient(config *oauth2.Config) (*http.Client, error) {
 			return nil, err
 		}
 
-		tok = oauth2.Token{AccessToken: accessToken, Expiry: expireTime, RefreshToken: refreshToken, TokenType: tokenType}
+		tok = &oauth2.Token{AccessToken: accessToken, Expiry: expireTime, RefreshToken: refreshToken, TokenType: tokenType}
 	} else {
 		return nil, fmt.Errorf("google selected but no token provided")
 	}
 
-	return config.Client(context.Background(), &tok), nil
+	return config.Client(context.Background(), tok), nil
 }
 
 // Request a token from the web, then returns the retrieved token.
@@ -125,7 +127,7 @@ func saveToken(path string, token *oauth2.Token) {
 func getService() (*drive.Service, error) {
 
 	var credentials []byte
-	if filename, found := os.LookupEnv("credentialsFile"); found {
+	if filename, found := os.LookupEnv("CredentialsFile"); found {
 		b, err := ioutil.ReadFile(filename)
 		if err != nil {
 			return nil, err
