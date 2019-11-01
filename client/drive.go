@@ -12,20 +12,67 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
+type googleCredentials struct {
+	Contents installed `json:"installed"`
+}
+
+type installed struct {
+	ClientID                string   `json:"client_id"`
+	ProjectID               string   `json:"project_id"`
+	AuthURI                 string   `json:"auth_uri"`
+	TokenURI                string   `json:"token_uri"`
+	AuthProviderX509CertURL string   `json:"auth_provider_x509_cert_url"`
+	ClientSecret            string   `json:"client_secret"`
+	RedirectUris            []string `json:"redirect_uris"`
+}
+
 // Retrieve a token, saves the token, then returns the generated client.
-func getClient(config *oauth2.Config) *http.Client {
+func getClient(config *oauth2.Config) (*http.Client, error) {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := "token.json"
-	tok, err := tokenFromFile(tokFile)
-	if err != nil {
-		tok := getTokenFromWeb(config)
-		saveToken(tokFile, tok)
+
+	var tok *oauth2.Token
+	if filename, found := os.LookupEnv("TokenFile"); found {
+		tokFile := filename
+		token, err := tokenFromFile(tokFile)
+		if err != nil {
+			tok = getTokenFromWeb(config)
+			saveToken(tokFile, tok)
+		} else {
+			tok = token
+		}
+	} else if accessToken, found := os.LookupEnv("AccessToken"); found {
+
+		tokenType, err := getEnvVar("TokenType")
+		if err != nil {
+			return nil, err
+		}
+
+		refreshToken, err := getEnvVar("RefreshToken")
+		if err != nil {
+			return nil, err
+		}
+
+		expiry, err := getEnvVar("expiry")
+		if err != nil {
+			return nil, err
+		}
+
+		expireTime, err := time.Parse("2006-01-02T15:04:05.999999999Z", expiry)
+		if err != nil {
+			return nil, err
+		}
+
+		tok = &oauth2.Token{AccessToken: accessToken, Expiry: expireTime, RefreshToken: refreshToken, TokenType: tokenType}
+	} else {
+		return nil, fmt.Errorf("google selected but no token provided")
 	}
-	return config.Client(context.Background(), tok)
+
+	return config.Client(context.Background(), tok), nil
 }
 
 // Request a token from the web, then returns the retrieved token.
@@ -71,20 +118,57 @@ func saveToken(path string, token *oauth2.Token) {
 }
 
 func getService() (*drive.Service, error) {
-	b, err := ioutil.ReadFile("credentials.json")
-	if err != nil {
-		fmt.Printf("Unable to read credentials.json file. Err: %v\n", err)
-		return nil, err
+
+	var credentials []byte
+	if filename, found := os.LookupEnv("CredentialsFile"); found {
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, err
+		}
+		credentials = b
+	} else if clientId, found := os.LookupEnv("ClientId"); found {
+		projectId, err := getEnvVar("ProjectID")
+		if err != nil {
+			return nil, err
+		}
+
+		clientSecret, err := getEnvVar("ClientSecret")
+		if err != nil {
+			return nil, err
+		}
+
+		uris := []string{"urn:ietf:wg:oauth:2.0:oob", "http://localhost"}
+		creds := googleCredentials{
+			installed{
+				ClientID:                clientId,
+				ProjectID:               projectId,
+				AuthURI:                 "https://accounts.google.com/o/oauth2/auth",
+				TokenURI:                "https://oauth2.googleapis.com/token",
+				AuthProviderX509CertURL: "https://www.googleapis.com/oauth2/v1/certs",
+				ClientSecret:            clientSecret,
+				RedirectUris:            uris,
+			},
+		}
+		credentials, err = json.Marshal(creds)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("google selected but no credentials provided")
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
-	config, err := google.ConfigFromJSON(b, drive.DriveFileScope)
+	config, err := google.ConfigFromJSON(credentials, drive.DriveFileScope)
 
 	if err != nil {
 		return nil, err
 	}
 
-	client := getClient(config)
+	client, err := getClient(config)
+	if err != nil {
+		fmt.Printf("Cannot create the Google Drive client: %v\n", err)
+		return nil, err
+	}
 
 	service, err := drive.New(client)
 
