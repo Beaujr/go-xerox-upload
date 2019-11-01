@@ -11,49 +11,57 @@ import (
 	"syscall"
 )
 
-func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.HandleFunc("/upload", upload)
-	log.Fatal(http.ListenAndServe(":10000", myRouter))
-}
-
 func main() {
 	fmt.Println("Xerox - Go server")
-	handleRequests()
-}
-
-func upload(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
-	r.ParseMultipartForm(32 << 20)
-
 	var x xclient.XeroxApi
 	x, err := xclient.NewClient()
 	if err != nil {
-		log.Println(err.Error())
-		w.Write([]byte(xclient.XRXERROR))
+		log.Panic(err)
 		return
 	}
+	handleRequests(x)
+}
 
-	directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))
-	operation := r.PostForm[xclient.Operation]
+func handleRequests(api xclient.XeroxApi) {
+	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter.Handle("/upload", upload(api))
+	log.Fatal(http.ListenAndServe(":10000", myRouter))
+}
 
-	fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
+func upload(x xclient.XeroxApi) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		r.ParseMultipartForm(32 << 20)
 
-	switch strings.Join(operation, "") {
-	case xclient.ListDirectory:
-		ListDirectory(x, directory, w)
-	case xclient.MakeDir:
-		MakeDirectory(x, directory, w)
-	case xclient.PutFile:
-		message, err := x.PutFile(r, directory)
+		var x xclient.XeroxApi
+		x, err := xclient.NewClient()
 		if err != nil {
-			w.Write([]byte(message))
+			log.Println(err.Error())
+			w.Write([]byte(xclient.XRXERROR))
+			return
 		}
-	case xclient.DeleteFile:
-		DeleteFile(x, directory, w, r)
-	case xclient.RemoveDir:
-		RemoveDir(x, directory, w)
-	}
+
+		directory := x.CleanPath(strings.Join(r.PostForm[xclient.DestDir], ""))
+		operation := r.PostForm[xclient.Operation]
+
+		fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
+
+		switch strings.Join(operation, "") {
+		case xclient.ListDirectory:
+			ListDirectory(x, directory, w)
+		case xclient.MakeDir:
+			MakeDirectory(x, directory, w)
+		case xclient.PutFile:
+			message, err := x.PutFile(r, directory)
+			if err != nil {
+				w.Write([]byte(message))
+			}
+		case xclient.DeleteFile:
+			DeleteFile(x, directory, w, r)
+		case xclient.RemoveDir:
+			RemoveDir(x, directory, w)
+		}
+	})
 }
 
 // ListDirectory handle the list directory command
