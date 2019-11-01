@@ -81,6 +81,10 @@ docker_push: docker-login
 	set -e; \
 	docker tag $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) $(APP_NAME):$(IMAGE_TAG)-$(GOARCH)-$(GIT_SHORT_COMMIT) ; \
 	docker push $(APP_NAME):$(IMAGE_TAG)-$(GOARCH)-$(GIT_SHORT_COMMIT);
+ifeq ($(GITHUB_HEAD_REF),master)
+	docker tag $(APP_NAME):$(IMAGE_TAG)-$(GOARCH)-$(GIT_SHORT_COMMIT) $(APP_NAME):latest_$(GOARCH)
+	docker push $(APP_NAME):latest_$(GOARCH)
+endif
 
 check-docker-credentials:
 ifndef DOCKER_USER
@@ -95,4 +99,4 @@ docker-login: check-docker-credentials
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS) $(REGISTRY)
 
 score: docker-login
-	docker run beaujr/gogitops:0.1-amd64-c38a93c -token=$(GITHUB_TOKEN) -user=Beaujr -query="go-xerox-upload language:golang+org:beaujr"
+	docker run beaujr/gogitops:latest_amd64 -token=$(GITHUB_TOKEN) -user=Beaujr -query="go-xerox-upload language:golang+org:beaujr"
