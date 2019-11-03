@@ -103,6 +103,7 @@ func getEnvVar(name string) (string, error) {
 	return v, nil
 }
 
+// HandleRequests takes the XeroxApi and handles all the List, Del, Remove, Put actions
 func HandleRequests(x XeroxApi) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
@@ -111,27 +112,26 @@ func HandleRequests(x XeroxApi) http.Handler {
 		operation := r.PostForm[Operation]
 
 		fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
-
 		switch strings.Join(operation, "") {
 		case ListDirectory:
-			ListDirectoryAction(x, directory, w)
+			listDirectoryAction(x, directory, w)
 		case MakeDir:
-			MakeDirectoryAction(x, directory, w)
+			makeDirectoryAction(x, directory, w)
 		case PutFile:
 			message, err := x.PutFile(r, directory)
 			if err != nil {
 				w.Write([]byte(message))
 			}
 		case DeleteFile:
-			DeleteFileAction(x, directory, w, r)
+			deleteFileAction(x, directory, w, r)
 		case RemoveDir:
-			RemoveDirAction(x, directory, w)
+			removeDirAction(x, directory, w)
 		}
 	})
 }
 
-// ListDirectory handle the list directory command
-func ListDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
+// listDirectoryAction handle the list directory command
+func listDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
 	items, err := x.ListDirectory(directory)
 	if err != nil {
 		//log.Println(err.Error())
@@ -141,8 +141,8 @@ func ListDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
 	}
 }
 
-// MakeDirectory handle the make directory command
-func MakeDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
+// makeDirectoryAction handle the make directory command
+func makeDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
 	err := x.MakeDirectory(directory)
 	if err != nil {
 		//   XRXBADNAME if the name is empty.
@@ -159,8 +159,8 @@ func MakeDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
 	}
 }
 
-// DeleteFile handle the delete file from FS
-func DeleteFileAction(x XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
+// deleteFileAction handle the delete file from FS
+func deleteFileAction(x XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
 	//   XRXNOTFOUND if the requested file isn't found.
 	//   XRXERROR the file cannot be deleted.
 	destinationName := r.PostForm[DestName]
@@ -179,8 +179,8 @@ func DeleteFileAction(x XeroxApi, directory string, w http.ResponseWriter, r *ht
 	}
 }
 
-// RemoveDir handle the delete folder from FS
-func RemoveDirAction(x XeroxApi, directory string, w http.ResponseWriter) {
+// removeDirAction handle the delete folder from FS
+func removeDirAction(x XeroxApi, directory string, w http.ResponseWriter) {
 	//   XRXBADNAME if the requested file isn't of the correct type or the name is empty.
 	//   XRXNOTFOUND if the requested file isn't found.
 	//   XRXERROR the file cannot be deleted.
