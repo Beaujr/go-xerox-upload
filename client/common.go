@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"syscall"
 )
 
 // ListDirectory is the Payload value from the Printer to List Directory Values to avoid filename collisions
@@ -99,4 +101,96 @@ func getEnvVar(name string) (string, error) {
 		return "", fmt.Errorf("%s must not be empty", name)
 	}
 	return v, nil
+}
+
+func HandleRequests(x XeroxApi) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		r.ParseMultipartForm(32 << 20)
+		directory := x.CleanPath(strings.Join(r.PostForm[DestDir], ""))
+		operation := r.PostForm[Operation]
+
+		fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
+
+		switch strings.Join(operation, "") {
+		case ListDirectory:
+			ListDirectoryAction(x, directory, w)
+		case MakeDir:
+			MakeDirectoryAction(x, directory, w)
+		case PutFile:
+			message, err := x.PutFile(r, directory)
+			if err != nil {
+				w.Write([]byte(message))
+			}
+		case DeleteFile:
+			DeleteFileAction(x, directory, w, r)
+		case RemoveDir:
+			RemoveDirAction(x, directory, w)
+		}
+	})
+}
+
+// ListDirectory handle the list directory command
+func ListDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
+	items, err := x.ListDirectory(directory)
+	if err != nil {
+		//log.Println(err.Error())
+		w.Write([]byte(XRXERROR))
+	} else {
+		w.Write([]byte(items))
+	}
+}
+
+// MakeDirectory handle the make directory command
+func MakeDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
+	err := x.MakeDirectory(directory)
+	if err != nil {
+		//   XRXBADNAME if the name is empty.
+		//   XRXDIREXISTS if the directory already exists.
+		//   XRXERROR if the directory cannot be created.
+		switch err.(*os.PathError).Err {
+		case syscall.EEXIST:
+			w.Write([]byte(XRXDIREXISTS))
+		case syscall.ENOENT:
+			w.Write([]byte(XRXBADNAME))
+		default:
+			w.Write([]byte(XRXERROR))
+		}
+	}
+}
+
+// DeleteFile handle the delete file from FS
+func DeleteFileAction(x XeroxApi, directory string, w http.ResponseWriter, r *http.Request) {
+	//   XRXNOTFOUND if the requested file isn't found.
+	//   XRXERROR the file cannot be deleted.
+	destinationName := r.PostForm[DestName]
+	filename := strings.Join(destinationName, "")
+	if strings.Join(destinationName, "") != "" {
+		directory = fmt.Sprintf("%s%s", directory, filename)
+	}
+	err := x.DeleteDir(directory)
+	if err != nil {
+		switch err.(*os.PathError).Err {
+		case syscall.ENOENT:
+			w.Write([]byte(XRXNOTFOUND))
+		default:
+			w.Write([]byte(XRXERROR))
+		}
+	}
+}
+
+// RemoveDir handle the delete folder from FS
+func RemoveDirAction(x XeroxApi, directory string, w http.ResponseWriter) {
+	//   XRXBADNAME if the requested file isn't of the correct type or the name is empty.
+	//   XRXNOTFOUND if the requested file isn't found.
+	//   XRXERROR the file cannot be deleted.
+	err := x.DeleteDir(directory)
+	if err != nil {
+		switch err.(*os.PathError).Err {
+		case syscall.ENOENT:
+			w.Write([]byte(XRXNOTFOUND))
+		default:
+			w.Write([]byte(XRXERROR))
+		}
+	}
 }

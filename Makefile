@@ -100,3 +100,11 @@ docker-login: check-docker-credentials
 
 score: docker-login
 	docker run beaujr/gogitops:latest_amd64 -token=$(GITHUB_TOKEN) -user=Beaujr -query="go-xerox-upload language:golang+org:beaujr"
+
+deploy:
+	docker build \
+	--build-arg GCLOUD_API_KEYFILE=$(GCLOUD_API_KEYFILE) \
+	--build-arg CLOUDSDK_CORE_PROJECT=go-xerox-upload \
+	-t gcloud \
+	-f build/Dockerfile.deploy \
+	.

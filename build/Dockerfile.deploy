@@ -1,0 +1,30 @@
+FROM golang:1.13.3-alpine3.10 as builder
+RUN apk update && apk add curl ca-certificates git
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+RUN mkdir -p /go/src/github.com/beaujr/go-xerox-upload
+
+ENV GOPATH=/go
+
+WORKDIR /go/src/github.com/beaujr/go-xerox-upload
+
+COPY . .
+
+RUN dep ensure
+
+FROM google/cloud-sdk:alpine
+
+ARG GCLOUD_API_KEYFILE=NOKEY
+ENV GCLOUD_API_KEYFILE=$GCLOUD_API_KEYFILE
+
+ARG CLOUDSDK_CORE_PROJECT=NOKEY
+ENV CLOUDSDK_CORE_PROJECT=$CLOUDSDK_CORE_PROJECT
+
+RUN gcloud components install app-engine-go
+RUN echo $GCLOUD_API_KEYFILE | base64 -d > /gcloud-api-key.json
+
+
+COPY --from=builder /go/src/github.com/beaujr/go-xerox-upload  /root/go/src/github.com/beaujr/go-xerox-upload/
+WORKDIR /root/go/src/github.com/beaujr/go-xerox-upload/
+
+RUN gcloud auth activate-service-account "githubactions@go-xerox-upload.iam.gserviceaccount.com" --key-file=/gcloud-api-key.json && gcloud app deploy --quiet

@@ -1,3 +1,11 @@
 build/Dockerfile
 bin/beaujr/
 vendor/
+.dockerignore
+.git/
+README.md
+*.json
+*.out
+files/
+bin/
+.github/
