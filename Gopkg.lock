@@ -15,7 +15,7 @@
   name = "github.com/golang/groupcache"
   packages = ["lru"]
   pruneopts = "UT"
-  revision = "4a4ac3fbac33b83bb138f808c8945a2812023fc4"
+  revision = "611e8accdfc92c4187d399e95ce826046d4c8d73"
 
 [[projects]]
   digest = "1:f5ce1529abc1204444ec73779f44f94e2fa8fcdb7aca3c355b0c95947e4005c6"
@@ -74,7 +74,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2ce67db9864088dee35dab5967f041d2b4ae1c7440dabb44542c1847933fd872"
+  digest = "1:e68bb8e38abc12b2b31771144e1f647b5a61ef02c0f6002d7d6b2e5cb9a67d66"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -87,7 +87,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "83d349e8ac1aeaa6e5b8669cbd094dccb2a7661d"
+  revision = "0deb6923b6d97481cb43bc1043fe5b72a0143032"
 
 [[projects]]
   branch = "master"
@@ -105,11 +105,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:89c4223950671f7afdc98761c6a601b83594865490c71b434194b6cacf208e6a"
+  digest = "1:999c8e6b10ddb08bc4ea3a56d4e838194c4884eac6ecf90a9aa98ed8475fdf37"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "33540a1f603772f9d4b761f416f5c10dade23e96"
+  revision = "f43be2a4598cf3a47be9f94f0c28197ed9eae611"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -137,7 +137,7 @@
   version = "v0.3.2"
 
 [[projects]]
-  digest = "1:1f9a22189a2f4c22d930ac9d63bba54b80852c2248b6793e4ff583e5a6163029"
+  digest = "1:90a75143cec402d59e07b82f7f38d4642e3a50cbbfd323eb0e59df59d4980e24"
   name = "google.golang.org/api"
   packages = [
     "drive/v3",
@@ -151,8 +151,8 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "UT"
-  revision = "d7605a20bfcb4659ee2ea347b1f8f5be12b8a5b7"
-  version = "v0.11.0"
+  revision = "4f42dad4690a01d7f6fa461106c63889ff1be027"
+  version = "v0.13.0"
 
 [[projects]]
   digest = "1:3c03b58f57452764a4499c55c582346c0ee78c8a5033affe5bdfd9efd3da5bd1"
@@ -179,7 +179,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "548a555dbc03994223efbaba0090152849259498"
+  revision = "919d9bdd9fe6f1a5dd95ce5d5e4cdb8fd3c516d0"
 
 [[projects]]
   digest = "1:6cd77d0b616d2dcebd363dfecba593f27b0151fc82cdb5fbfb96c5a7cfbc95b5"
@@ -231,6 +231,7 @@
     "golang.org/x/oauth2",
     "golang.org/x/oauth2/google",
     "google.golang.org/api/drive/v3",
+    "google.golang.org/appengine",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

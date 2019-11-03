@@ -1,0 +1,10 @@
+env_variables:
+  ClientId: "1095922909783-2346qbduk5pldglkvpb8f9gu1j2qjn7a.apps.googleusercontent.com"
+  ProjectID: "quickstart-1572204715725"
+  ClientSecret: "43hNsMJU50_mFreV8E4std7m"
+  AccessToken: "ya29.Il-pB0sx4_qwoD5UzmrbDYTNWoBzXEZgfDihFCb80d96xlJZazI9efoA9rpS4moy_MH_5U9_u3E1liUE4O5IUwXNjVKYyovvt0ibI8USmkBth-21lQnphxlipWaxJPrJiw"
+  TokenType: "Bearer"
+  RefreshToken: "1//03_bAAbxe9w2LCgYIARAAGAMSNwF-L9Ir30T136A-FwO0PgLqORRHsxS1499WpQpMn_6olqRE_UF3wlFZ95nyF5gZYoMPHJC0kYw"
+  expiry: "2019-10-28T23:00:03.269532774Z"
+  google: true
+  appengine: true
