@@ -27,6 +27,7 @@ RUN echo $GCLOUD_API_KEYFILE | base64 -d > /gcloud-api-key.json
 COPY --from=builder /go/src/github.com/beaujr/go-xerox-upload  /root/go/src/github.com/beaujr/go-xerox-upload/
 WORKDIR /root/go/src/github.com/beaujr/go-xerox-upload/
 
+
 ARG CLIENT_ID=NOKEY
 ENV CLIENT_ID=$CLIENT_ID
 
