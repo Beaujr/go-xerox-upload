@@ -1,10 +1,10 @@
 env_variables:
-  ClientId: ""
-  ProjectID: ""
-  ClientSecret: ""
-  AccessToken: ""
+  ClientId: "CLIENT_ID"
+  ProjectID: "PROJECT_ID"
+  ClientSecret: "CLIENT_SECRET"
+  AccessToken: "ACCESS_TOKEN"
   TokenType: "Bearer"
-  RefreshToken: ""
-  expiry: ""
+  RefreshToken: "REFRESH_TOKEN"
+  expiry: "EXPIRY_TIME"
   google: true
   appengine: true
