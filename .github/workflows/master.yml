@@ -19,4 +19,4 @@ jobs:
     - name: Push the ARM Docker image
       run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GOARCH=arm GITHUB_HEAD_REF=master
     - name: Deploy to AppEngine
-      run: make deploy GCLOUD_API_KEYFILE==${{ secrets.APPENGINE_SERVICE_ACCOUNT }}
+      run: make deploy GCLOUD_API_KEYFILE=${{ secrets.APPENGINE_SERVICE_ACCOUNT }} CLIENT_ID=${{ secrets.CLIENT_ID }} PROJECT_ID=${{ secrets.PROJECT_ID }} CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }} REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }} EXPIRY_TIME=${{ secrets.EXPIRY_TIME }}

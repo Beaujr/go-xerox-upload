@@ -105,6 +105,12 @@ deploy:
 	docker build \
 	--build-arg GCLOUD_API_KEYFILE=$(GCLOUD_API_KEYFILE) \
 	--build-arg CLOUDSDK_CORE_PROJECT=go-xerox-upload \
+	--build-arg CLIENT_ID=$(CLIENT_ID) \
+	--build-arg PROJECT_ID=$(PROJECT_ID) \
+	--build-arg CLIENT_SECRET=$(CLIENT_SECRET) \
+	--build-arg ACCESS_TOKEN=$(ACCESS_TOKEN) \
+	--build-arg REFRESH_TOKEN=$(REFRESH_TOKEN) \
+	--build-arg EXPIRY_TIME=$(EXPIRY_TIME) \
 	-t gcloud \
 	-f build/Dockerfile.deploy \
 	.
