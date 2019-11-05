@@ -183,7 +183,7 @@ func getService() (*drive.Service, error) {
 func findDir(service *drive.Service, name string, parentId string) (string, error) {
 	nameQuery := fmt.Sprintf("name = '%s'", name)
 	parentQuery := fmt.Sprintf("'%s' in parents", parentId)
-	files, err := service.Files.List().Q(fmt.Sprintf("%s and %s", nameQuery, parentQuery)).Do()
+	files, err := service.Files.List().Q(fmt.Sprintf("%s and %s", nameQuery, parentQuery)).OrderBy("createdTime").Do()
 
 	if err != nil {
 		log.Println("Could execute search: " + err.Error())
@@ -194,7 +194,14 @@ func findDir(service *drive.Service, name string, parentId string) (string, erro
 		fmt.Println(file.Name)
 	}
 
-	if len(files.Files) != 1 {
+	if len(files.Files) > 1 {
+		for _, file := range files.Files {
+			fmt.Println(file.Name)
+			fmt.Println(file.Id)
+		}
+	}
+
+	if len(files.Files) < 1 {
 		return "", fmt.Errorf("%d results", len(files.Files))
 	}
 	return files.Files[0].Id, nil

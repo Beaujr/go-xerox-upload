@@ -102,15 +102,12 @@ score: docker-login
 	docker run beaujr/gogitops:latest_amd64 -token=$(GITHUB_TOKEN) -user=Beaujr -query="go-xerox-upload language:golang+org:beaujr"
 
 deploy:
-	docker build \
-	--build-arg GCLOUD_API_KEYFILE=$(GCLOUD_API_KEYFILE) \
-	--build-arg CLOUDSDK_CORE_PROJECT=go-xerox-upload \
-	--build-arg CLIENT_ID=$(CLIENT_ID) \
-	--build-arg PROJECT_ID=$(PROJECT_ID) \
-	--build-arg CLIENT_SECRET=$(CLIENT_SECRET) \
-	--build-arg ACCESS_TOKEN=$(ACCESS_TOKEN) \
-	--build-arg REFRESH_TOKEN=$(REFRESH_TOKEN) \
-	--build-arg EXPIRY_TIME=$(EXPIRY_TIME) \
-	-t gcloud \
-	-f build/Dockerfile.deploy \
-	.
+	docker build -t gcloud -f build/Dockerfile.deploy .; \
+	docker run -e GCLOUD_API_KEYFILE=$(GCLOUD_API_KEYFILE) \
+	-e CLOUDSDK_CORE_PROJECT=go-xerox-upload \
+	-e CLIENT_ID=$(CLIENT_ID) \
+	-e PROJECT_ID=$(PROJECT_ID) \
+	-e CLIENT_SECRET=$(CLIENT_SECRET) \
+	-e ACCESS_TOKEN=$(ACCESS_TOKEN) \
+	-e REFRESH_TOKEN=$(REFRESH_TOKEN) \
+	-e EXPIRY_TIME=$(EXPIRY_TIME) gcloud:latest;

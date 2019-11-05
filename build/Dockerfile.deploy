@@ -14,47 +14,12 @@ RUN dep ensure
 
 FROM google/cloud-sdk:alpine
 
-ARG GCLOUD_API_KEYFILE=NOKEY
-ENV GCLOUD_API_KEYFILE=$GCLOUD_API_KEYFILE
-
 ARG CLOUDSDK_CORE_PROJECT=NOKEY
 ENV CLOUDSDK_CORE_PROJECT=$CLOUDSDK_CORE_PROJECT
 
 RUN gcloud components install app-engine-go
-RUN echo $GCLOUD_API_KEYFILE | base64 -d > /gcloud-api-key.json
-
 
 COPY --from=builder /go/src/github.com/beaujr/go-xerox-upload  /root/go/src/github.com/beaujr/go-xerox-upload/
 WORKDIR /root/go/src/github.com/beaujr/go-xerox-upload/
 
-
-ARG CLIENT_ID=NOKEY
-ENV CLIENT_ID=$CLIENT_ID
-
-ARG PROJECT_ID=NOKEY
-ENV PROJECT_ID=$PROJECT_ID
-
-ARG CLIENT_SECRET=NOKEY
-ENV CLIENT_SECRET=$CLIENT_SECRET
-
-ARG ACCESS_TOKEN=NOKEY
-ENV ACCESS_TOKEN=$ACCESS_TOKEN
-
-ARG REFRESH_TOKEN=NOKEY
-ENV REFRESH_TOKEN=$REFRESH_TOKEN
-
-ARG EXPIRY_TIME=NOKEY
-ENV EXPIRY_TIME=$EXPIRY_TIME
-
-ARG SERVICE_ACCOUNT=NOKEY
-ENV SERVICE_ACCOUNT=$SERVICE_ACCOUNT
-
-
-RUN sed -i "s/CLIENT_ID/$CLIENT_ID/" env_variables.yaml
-RUN sed -i "s/PROJECT_ID/$PROJECT_ID/" env_variables.yaml
-RUN sed -i "s/CLIENT_SECRET/$CLIENT_SECRET/" env_variables.yaml
-RUN sed -i "s/ACCESS_TOKEN/$ACCESS_TOKEN/" env_variables.yaml
-RUN sed -i "s|REFRESH_TOKEN|$REFRESH_TOKEN|" env_variables.yaml
-RUN sed -i "s/EXPIRY_TIME/$EXPIRY_TIME/" env_variables.yaml
-
-RUN gcloud auth activate-service-account "githubactions@go-xerox-upload.iam.gserviceaccount.com" --key-file=/gcloud-api-key.json && gcloud app deploy --quiet
+ENTRYPOINT ["/bin/bash", "./build/deploy.sh"]

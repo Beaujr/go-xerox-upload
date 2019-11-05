@@ -1,4 +1,4 @@
-build/
+build/Dockerfile.*
 bin/beaujr/
 vendor/
 .dockerignore
