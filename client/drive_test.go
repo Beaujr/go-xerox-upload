@@ -82,7 +82,6 @@ func TestGetServiceResultFileFoundBrokenEnv(t *testing.T) {
 	os.Unsetenv("CredentialsFile")
 }
 
-
 func TestGetGoogleClient(t *testing.T) {
 	os.Setenv("google", "true")
 
