@@ -81,3 +81,45 @@ func TestGetServiceResultFileFoundBrokenEnv(t *testing.T) {
 	}
 	os.Unsetenv("CredentialsFile")
 }
+
+
+func TestGetGoogleClient(t *testing.T) {
+	os.Setenv("google", "true")
+
+	os.Setenv("ClientId", "ClientId")
+	os.Setenv("ProjectID", "ProjectID")
+	os.Setenv("ClientSecret", "ClientSecret")
+
+	os.Setenv("AccessToken", "true")
+	os.Setenv("TokenType", "true")
+	os.Setenv("RefreshToken", "true")
+	os.Setenv("expiry", "2006-01-02T15:04:05.999999999Z")
+
+	_, err := NewClient()
+	obtained := err
+	if nil != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "nil", obtained)
+	}
+	os.Unsetenv("google")
+	os.Unsetenv("ClientId")
+	os.Unsetenv("ProjectID")
+	os.Unsetenv("ClientSecret")
+
+	os.Unsetenv("AccessToken")
+	os.Unsetenv("TokenType")
+	os.Unsetenv("RefreshToken")
+	os.Unsetenv("expiry")
+}
+
+func TestGetServiceResultTokenFileFound(t *testing.T) {
+	os.Setenv("TokenFile", "../tests/token.json")
+	os.Setenv("CredentialsFile", "../tests/credentials.json")
+	_, err := getService()
+	expected := "nil"
+	obtained := err
+	if nil != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
+	}
+	os.Unsetenv("CredentialsFile")
+	os.Unsetenv("TokenFile")
+}

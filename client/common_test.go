@@ -51,21 +51,3 @@ func TestGetFileSystemClientNoPGID(t *testing.T) {
 	os.Unsetenv("GID")
 
 }
-
-func TestGetGoogleClient(t *testing.T) {
-	os.Setenv("ClientId", "ClientId")
-	os.Setenv("ProjectID", "ProjectID")
-	os.Setenv("ClientSecret", "ClientSecret")
-
-	os.Setenv("google", "true")
-	_, err := NewClient()
-	expected := "google selected but no token provided"
-	obtained := err.Error()
-	if expected != obtained {
-		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
-	}
-	os.Unsetenv("google")
-	os.Unsetenv("ClientId")
-	os.Unsetenv("ProjectID")
-	os.Unsetenv("ClientSecret")
-}
