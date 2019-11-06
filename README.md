@@ -1,5 +1,10 @@
 # go-xerox-upload
 
+## Disclaimer
+I have no connection with Xerox
+Use this software at your own risk.
+No Warranty and no support provided.
+
 ## Introduction
 
 > A HTTP server to use with Xerox WorkCentre 3345DNi "scan to" functionality
