@@ -18,6 +18,14 @@ func main() {
 	}
 	if _, appeng := os.LookupEnv("appengine"); appeng {
 		http.Handle("/upload", xclient.HandleRequests(x))
+		http.Handle("/_ah/stop", http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+			}))
+		http.Handle("/_ah/start", http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+			}))
 		appengine.Main()
 	} else {
 		myRouter := mux.NewRouter().StrictSlash(true)
