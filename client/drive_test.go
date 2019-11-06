@@ -1,8 +1,8 @@
 package client
 
 import (
-	"testing"
 	"os"
+	"testing"
 )
 
 func TestGetServiceResultError(t *testing.T) {
@@ -11,8 +11,8 @@ func TestGetServiceResultError(t *testing.T) {
 	//env := Env{db: &mockSuccessAdminDB{}}
 	//
 	//test_helpers.InvokeHandler(http.Handler(createEntitlement(&env)), entitlementEndpointPath, rec, req)
+	os.Setenv("google", "true")
 	_, err := getService()
-
 	expected := "google selected but no credentials provided"
 	obtained := err.Error()
 	if expected != obtained {
@@ -43,6 +43,10 @@ func TestGetServiceResultEnv(t *testing.T) {
 	if expected != obtained {
 		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
 	}
+	os.Unsetenv("ClientId")
+	os.Unsetenv("ProjectID")
+	os.Unsetenv("ClientSecret")
+
 }
 
 func TestGetServiceResultFileNotFoundEnv(t *testing.T) {
@@ -53,6 +57,7 @@ func TestGetServiceResultFileNotFoundEnv(t *testing.T) {
 	if expected != obtained {
 		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
 	}
+	os.Unsetenv("CredentialsFile")
 }
 
 func TestGetServiceResultFileFoundEnv(t *testing.T) {
@@ -63,4 +68,16 @@ func TestGetServiceResultFileFoundEnv(t *testing.T) {
 	if expected != obtained {
 		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
 	}
+	os.Unsetenv("CredentialsFile")
+}
+
+func TestGetServiceResultFileFoundBrokenEnv(t *testing.T) {
+	os.Setenv("CredentialsFile", "../tests/credentials_broken.json")
+	_, err := getService()
+	expected := "invalid character '}' after array element"
+	obtained := err.Error()
+	if expected != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
+	}
+	os.Unsetenv("CredentialsFile")
 }

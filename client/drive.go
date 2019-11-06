@@ -117,7 +117,6 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-
 func getCredentials() ([]byte, error) {
 	var credentials []byte
 	if filename, found := os.LookupEnv("CredentialsFile"); found {
@@ -158,7 +157,6 @@ func getCredentials() ([]byte, error) {
 	}
 	return credentials, nil
 }
-
 
 func getService() (*drive.Service, error) {
 	credentials, err := getCredentials()
