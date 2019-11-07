@@ -24,7 +24,7 @@ GOLDFLAGS := -ldflags "-X $(PACKAGE_NAME)/pkg/util.AppGitCommit=${GIT_COMMIT} -X
 # Alias targets
 ###############
 
-build: go_dep  go_test go_upload_xerox # docker_build
+build: go_dep go_test go_upload_xerox # docker_build
 verify: generate_verify go_verify
 #push: build docker_push
 
@@ -42,13 +42,15 @@ go_upload_xerox:
 		./
 
 go_test:
-	go test -v \
+ifeq ($(GOARCH),amd64)
+	CGO_ENABLED=0 go test -v \
 		-cover \
 		-coverprofile=coverage.out \
 		$$(go list ./... | \
 			grep -v '/vendor/' | \
 			grep -v '/pkg/client' \
 		)
+endif
 
 coverage: go_test
 	go tool cover -html=coverage.out

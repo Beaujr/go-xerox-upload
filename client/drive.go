@@ -117,8 +117,7 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func getService() (*drive.Service, error) {
-
+func getCredentials() ([]byte, error) {
 	var credentials []byte
 	if filename, found := os.LookupEnv("CredentialsFile"); found {
 		b, err := ioutil.ReadFile(filename)
@@ -156,7 +155,14 @@ func getService() (*drive.Service, error) {
 	} else {
 		return nil, fmt.Errorf("google selected but no credentials provided")
 	}
+	return credentials, nil
+}
 
+func getService() (*drive.Service, error) {
+	credentials, err := getCredentials()
+	if err != nil {
+		return nil, err
+	}
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(credentials, drive.DriveFileScope)
 
@@ -171,7 +177,6 @@ func getService() (*drive.Service, error) {
 	}
 
 	service, err := drive.New(client)
-
 	if err != nil {
 		fmt.Printf("Cannot create the Google Drive service: %v\n", err)
 		return nil, err
@@ -190,21 +195,12 @@ func findDir(service *drive.Service, name string, parentId string) (string, erro
 		return "", err
 	}
 
-	for _, file := range files.Files {
-		fmt.Println(file.Name)
-	}
-
-	if len(files.Files) > 1 {
-		for _, file := range files.Files {
-			fmt.Println(file.Name)
-			fmt.Println(file.Id)
-		}
-	}
-
 	if len(files.Files) < 1 {
 		return "", fmt.Errorf("%d results", len(files.Files))
 	}
-	return files.Files[0].Id, nil
+
+	fileId := files.Files[0].Id
+	return fileId, nil
 }
 
 func createDir(service *drive.Service, name string, parentId string) (*drive.File, error) {

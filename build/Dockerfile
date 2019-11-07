@@ -13,9 +13,6 @@ COPY . .
 
 ARG GOOS
 ARG GOARCH
-
-RUN dep ensure
-
 RUN make build GOOS=${GOOS} GOARCH=${GOARCH}
 
 RUN mv bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} bin/beaujr/go-xerox-upload
