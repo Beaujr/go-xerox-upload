@@ -42,7 +42,7 @@ go_upload_xerox:
 		./
 
 go_test:
-	go test -v \
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go test -v \
 		-cover \
 		-coverprofile=coverage.out \
 		$$(go list ./... | \
