@@ -41,7 +41,10 @@ func getClient(config *oauth2.Config) (*http.Client, error) {
 		token, err := tokenFromFile(tokFile)
 		if err != nil {
 			tok = getTokenFromWeb(config)
-			saveToken(tokFile, tok)
+			err = saveToken(tokFile, tok)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			tok = token
 		}
@@ -107,14 +110,14 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 // Saves a token to a file path.
-func saveToken(path string, token *oauth2.Token) {
+func saveToken(path string, token *oauth2.Token) error {
 	fmt.Printf("Saving credential file to: %s\n", path)
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
+		return err
 	}
 	defer f.Close()
-	json.NewEncoder(f).Encode(token)
+	return json.NewEncoder(f).Encode(token)
 }
 
 func getCredentials() ([]byte, error) {
