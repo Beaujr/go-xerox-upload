@@ -122,3 +122,35 @@ func TestGetServiceResultTokenFileFound(t *testing.T) {
 	os.Unsetenv("CredentialsFile")
 	os.Unsetenv("TokenFile")
 }
+
+func TestGSaveToken(t *testing.T) {
+	token, err := tokenFromFile("../tests/token.json")
+	if err != nil {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "Token to be saved", err.Error())
+	}
+
+	err = saveToken("../tests/saveToken.json", token)
+
+	expected := "nil"
+	obtained := err
+
+	if nil != err {
+		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
+	}
+}
+
+func TestGSaveTokenError(t *testing.T) {
+	token, err := tokenFromFile("../tests/token.json")
+	if err != nil {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "Token to be saved", err.Error())
+	}
+
+	err = saveToken("../fakepath/saveToken.json", token)
+
+	expected := "open ../fakepath/saveToken.json: no such file or directory"
+	obtained := err.Error()
+
+	if expected != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
+	}
+}
