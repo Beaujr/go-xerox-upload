@@ -110,6 +110,7 @@ func TestGetGoogleClient(t *testing.T) {
 	os.Unsetenv("expiry")
 }
 
+
 func TestGetServiceResultTokenFileFound(t *testing.T) {
 	os.Setenv("TokenFile", "../tests/token.json")
 	os.Setenv("CredentialsFile", "../tests/credentials.json")
@@ -153,4 +154,61 @@ func TestGSaveTokenError(t *testing.T) {
 	if expected != obtained {
 		t.Errorf("\n...expected = %v\n...obtained = %v", expected, obtained)
 	}
+}
+
+func TestGetGoogleClientMissingTokenEnvs(t *testing.T) {
+	os.Setenv("google", "true")
+
+	os.Setenv("ClientId", "ClientId")
+	os.Setenv("ProjectID", "ProjectID")
+	os.Setenv("ClientSecret", "ClientSecret")
+
+	os.Setenv("AccessToken", "true")
+
+	_, err := NewClient()
+	obtained := err.Error()
+	expected := "TokenType must be set"
+	if expected != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "nil", obtained)
+	}
+
+	os.Setenv("TokenType", "true")
+	_, err = NewClient()
+	obtained = err.Error()
+	expected = "RefreshToken must be set"
+	if expected != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "nil", obtained)
+	}
+
+	os.Setenv("RefreshToken", "true")
+	_, err = NewClient()
+	obtained = err.Error()
+	expected = "expiry must be set"
+	if expected != obtained {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "nil", obtained)
+	}
+
+
+
+	os.Setenv("expiry", "2006-01-02T15:04:05.999999999Z")
+	_, err = NewClient()
+	if nil != err {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "nil", obtained)
+	}
+
+	os.Setenv("expiry", "2006-02T15:04:05.999999999Z")
+	_, err = NewClient()
+	if nil == err {
+		t.Errorf("\n...expected = %v\n...obtained = %v", "Error with parsing date", obtained)
+	}
+
+	os.Unsetenv("google")
+	os.Unsetenv("ClientId")
+	os.Unsetenv("ProjectID")
+	os.Unsetenv("ClientSecret")
+
+	os.Unsetenv("AccessToken")
+	os.Unsetenv("TokenType")
+	os.Unsetenv("RefreshToken")
+	os.Unsetenv("expiry")
 }
