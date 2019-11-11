@@ -110,7 +110,6 @@ func TestGetGoogleClient(t *testing.T) {
 	os.Unsetenv("expiry")
 }
 
-
 func TestGetServiceResultTokenFileFound(t *testing.T) {
 	os.Setenv("TokenFile", "../tests/token.json")
 	os.Setenv("CredentialsFile", "../tests/credentials.json")
@@ -187,8 +186,6 @@ func TestGetGoogleClientMissingTokenEnvs(t *testing.T) {
 	if expected != obtained {
 		t.Errorf("\n...expected = %v\n...obtained = %v", "nil", obtained)
 	}
-
-
 
 	os.Setenv("expiry", "2006-01-02T15:04:05.999999999Z")
 	_, err = NewClient()
