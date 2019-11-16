@@ -100,8 +100,11 @@ endif
 docker-login: check-docker-credentials
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS) $(REGISTRY)
 
-score: docker-login
-	docker run beaujr/gogitops:latest_amd64 -token=$(GITHUB_TOKEN) -user=Beaujr -query="go-xerox-upload language:golang+org:beaujr"
+score: PR_ID=$(shell echo $(GITHUB_REF) | tr -dc '0-9')
+score:
+	curl -X GET \
+	https://gogitops.beau.cf/$(GITHUB_REPOSITORY)/pull/$(PR_ID) \
+	-H 'apikey: $(GITOPS_API_KEY)'
 
 deploy:
 	docker build -t gcloud -f build/Dockerfile.deploy .; \
