@@ -9,7 +9,7 @@ No Warranty and no support provided.
 
 > A HTTP server to use with Xerox WorkCentre 3345DNi "scan to" functionality
 Support for:
-- Google Drive (credentials.json & token.json) requiredt.
+- Google Drive (credentials.json & token.json) required.
 - FileSystem upload
 
 Default port is 10000
@@ -30,7 +30,7 @@ docker run --name xerox
  -v $(pwd)/credentials.json:/credentials.json
  -v $(pwd)/token.json:/token.json
 -p 8081:10000
-beaujr/go-xerox-upload:latest_amd64_
+beaujr/go-xerox-upload:latest_amd64
 ```
 
 
@@ -47,7 +47,7 @@ docker run --name xerox
  -e RefreshToken=<RefreshToken>
  -e expiry=<expiry>
 -p 8081:10000
-beaujr/go-xerox-upload:latest_amd64_
+beaujr/go-xerox-upload:latest_amd64
 ```
 
 Download to local Filesystem
@@ -57,7 +57,7 @@ docker run --name xerox
 -e GID=1000
 -v <volume_to_mount>:<volume_dest>
 -p 8081:10000
-beaujr/go-xerox-upload:latest_amd64_
+beaujr/go-xerox-upload:latest_amd64
 ```
 
 Environment Variables for App Engine
