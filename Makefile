@@ -104,7 +104,9 @@ score: PR_ID=$(shell echo $(GITHUB_REF) | tr -dc '0-9')
 score:
 	curl -X GET \
 	https://gogitops.beau.cf/$(GITHUB_REPOSITORY)/pull/$(PR_ID) \
-	-H 'apikey: $(GITOPS_API_KEY)'
+	-H 'apikey: $(GITOPS_API_KEY)' \
+	-H 'user: $(GITHUB_USER)' \
+	-H 'token: $(GITHUB_TOKEN)'
 
 deploy:
 	docker build -t gcloud -f build/Dockerfile.deploy .; \

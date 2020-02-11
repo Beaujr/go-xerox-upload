@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Run go report card on PR
-      run: make score GITOPS_API_KEY=${{ secrets.GITOPS_API_KEY }}
+      run: make score GITOPS_API_KEY=${{ secrets.GITOPS_API_KEY }} GITHUB_USER=github-actions GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}
     - name: Build the Docker image
       run: make docker_build
     - name: Build the ARM Docker image
