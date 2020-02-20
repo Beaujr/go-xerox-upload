@@ -30,6 +30,6 @@ func main() {
 	} else {
 		myRouter := mux.NewRouter().StrictSlash(true)
 		myRouter.Handle("/upload", xclient.HandleRequests(x))
-		http.ListenAndServe(":10000", myRouter)
+		err = http.ListenAndServe(":10000", myRouter)
 	}
 }
