@@ -1,14 +1,16 @@
 package main
 
 import (
+	"net/http"
 	"fmt"
 	xclient "github.com/beaujr/go-xerox-upload/client"
 	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
-	"net/http"
+	"log"
 	"os"
 )
 
+// This is a Simple Mispelling
 func main() {
 	fmt.Println("Xerox - Go server")
 	x, err := xclient.NewClient()
@@ -30,6 +32,8 @@ func main() {
 	} else {
 		myRouter := mux.NewRouter().StrictSlash(true)
 		myRouter.Handle("/upload", xclient.HandleRequests(x))
-		err = http.ListenAndServe(":10000", myRouter)
+		if err := http.ListenAndServe(":10000", myRouter); err != nil {
+			log.Panic(err)
+		}
 	}
 }
