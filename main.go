@@ -1,16 +1,15 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
 	xclient "github.com/beaujr/go-xerox-upload/client"
 	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
 	"log"
+	"net/http"
 	"os"
 )
 
-// This is a Simple Mispelling
 func main() {
 	fmt.Println("Xerox - Go server")
 	x, err := xclient.NewClient()
