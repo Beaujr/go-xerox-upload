@@ -5,6 +5,7 @@ import (
 	xclient "github.com/beaujr/go-xerox-upload/client"
 	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
+	"log"
 	"net/http"
 	"os"
 )
@@ -30,6 +31,8 @@ func main() {
 	} else {
 		myRouter := mux.NewRouter().StrictSlash(true)
 		myRouter.Handle("/upload", xclient.HandleRequests(x))
-		http.ListenAndServe(":10000", myRouter)
+		if err := http.ListenAndServe(":10000", myRouter); err != nil {
+			log.Panic(err)
+		}
 	}
 }
