@@ -138,7 +138,7 @@ func HandleOCRRequest() http.Handler {
 				log.Printf("OCRing %s\n", file.Name)
 				_, err := x.OCRFile(file.Id, parentId, file.Name)
 				if err != nil {
-					log.Printf("Error occured for file %s, %s\n", file.Name, err.Error())
+					log.Printf("Error occurred for file %s, %s\n", file.Name, err.Error())
 				}
 			}
 		}

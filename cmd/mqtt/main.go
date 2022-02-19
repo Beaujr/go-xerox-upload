@@ -36,7 +36,7 @@ func onMessageReceived(client MQTT.Client, message MQTT.Message) {
 	}
 	_, err = x.OCRFile(rrq.FileId, rrq.ParentId, rrq.Name)
 	if err != nil {
-		log.Printf("Error occured for file %s, %s\n", rrq.Name, err.Error())
+		log.Printf("Error occurred for file %s, %s\n", rrq.Name, err.Error())
 	}
 	log.Println("Submitted")
 }
