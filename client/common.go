@@ -108,7 +108,7 @@ func HandleOCRRequest() http.Handler {
 		_, found := os.LookupEnv("cloudrun")
 		if found {
 			user, pass, ok := r.BasicAuth()
-			if !ok || user != "xerox" && pass != "5.[H]/_qpgq39[{t" {
+			if !ok || user != "xerox" && pass != *password {
 				w.WriteHeader(401)
 				w.Write([]byte("Unauthorized.\n"))
 				return
