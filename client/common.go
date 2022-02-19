@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -62,7 +63,7 @@ func NewClient() (XeroxApi, error) {
 	_, found := os.LookupEnv("google")
 	var x XeroxApi
 	if found {
-		gc, err := NewGoogleClient()
+		gc, err := NewGoogleXeroxClient()
 		if err != nil {
 			return nil, err
 		}
@@ -102,16 +103,69 @@ func getEnvVar(name string) (string, error) {
 	}
 	return v, nil
 }
+func HandleOCRRequest() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, found := os.LookupEnv("cloudrun")
+		if found {
+			user, pass, ok := r.BasicAuth()
+			if !ok || user != "xerox" && pass != "5.[H]/_qpgq39[{t" {
+				w.WriteHeader(401)
+				w.Write([]byte("Unauthorized.\n"))
+				return
+			}
+		}
+		x, err := NewGoogleClient()
+		if err != err {
+			w.WriteHeader(401)
+			w.Write([]byte("Unauthorized.\n"))
+			return
+		}
+
+		files, err := x.ListGoogleDirectory("/mail/shared/2022")
+		if err != err {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		parentId, err := x.FindDir("/mail/shared/2022")
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		for _, file := range files.Files {
+			if file.MimeType == "application/pdf" && strings.Index(file.Name, "ocr") < 0 {
+				log.Printf("OCRing %s\n", file.Name)
+				_, err := x.OCRFile(file.Id, parentId, file.Name)
+				if err != nil {
+					log.Printf("Error occured for file %s, %s\n", file.Name, err.Error())
+				}
+			}
+		}
+		w.WriteHeader(200)
+		return
+	})
+}
 
 // HandleRequests takes the XeroxApi and handles all the List, Del, Remove, Put actions
 func HandleRequests(x XeroxApi) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, found := os.LookupEnv("cloudrun")
+		if found {
+			user, pass, ok := r.BasicAuth()
+			if !ok || user != "xerox" && pass != "5.[H]/_qpgq39[{t" {
+				w.WriteHeader(401)
+				w.Write([]byte("Unauthorized.\n"))
+				return
+			}
+		}
+
 		w.WriteHeader(200)
 		r.ParseMultipartForm(32 << 20)
 		directory := x.CleanPath(strings.Join(r.PostForm[DestDir], ""))
 		operation := r.PostForm[Operation]
-
 		fmt.Println(fmt.Sprintf("Endpoint Hit: %s", operation))
+
 		switch strings.Join(operation, "") {
 		case ListDirectory:
 			listDirectoryAction(x, directory, w)
@@ -126,6 +180,8 @@ func HandleRequests(x XeroxApi) http.Handler {
 			deleteFileAction(x, directory, w, r)
 		case RemoveDir:
 			removeDirAction(x, directory, w)
+		default:
+			w.WriteHeader(200)
 		}
 	})
 }
@@ -134,7 +190,7 @@ func HandleRequests(x XeroxApi) http.Handler {
 func listDirectoryAction(x XeroxApi, directory string, w http.ResponseWriter) {
 	items, err := x.ListDirectory(directory)
 	if err != nil {
-		//log.Println(err.Error())
+		log.Println(err.Error())
 		w.Write([]byte(XRXERROR))
 	} else {
 		w.Write([]byte(items))

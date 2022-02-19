@@ -1,33 +1,43 @@
 package client
 
 import (
+	"bytes"
 	"fmt"
 	"google.golang.org/api/drive/v3"
+	"io"
+	"log"
 	"net/http"
+	"os/exec"
 	"strings"
 	"time"
 )
 
-type googleClient struct {
+type GoogleClient struct {
 	XeroxApi
 	service *drive.Service
 }
 
-// NewGoogleClient creates a new Google Drive client
-func NewGoogleClient() (XeroxApi, error) {
+// NewGoogleXeroxClient creates a new Google Drive client
+func NewGoogleXeroxClient() (XeroxApi, error) {
+	return NewGoogleClient()
+}
+
+// NewGoogleXeroxClient creates a new Google Drive client
+func NewGoogleClient() (*GoogleClient, error) {
 	service, err := getService()
 	if err != nil {
 		return nil, err
 	}
 
-	googleClient := googleClient{service: service}
+	googleClient := GoogleClient{service: service}
 	return &googleClient, nil
 }
 
 // PutFile is the function to upload a file
-func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, error) {
+func (google *GoogleClient) PutFile(r *http.Request, directory string) ([]byte, error) {
 	file, _, err := r.FormFile(Sendfile)
 	if err != nil {
+		log.Println(err)
 		return []byte(XRXERROR), err
 	}
 	defer file.Close()
@@ -38,25 +48,23 @@ func (google *googleClient) PutFile(r *http.Request, directory string) ([]byte, 
 	if err != nil {
 		return []byte(XRXERROR), err
 	}
-
 	driveFile, err := createFile(google.service, filename, "application/pdf", file, parentId)
 	if err != nil {
-		panic(fmt.Sprintf("Could not create file: %v\n", err))
+		return []byte(XRXERROR), err
 	}
-
 	fmt.Printf("File '%s' successfully uploaded in '%s' directory", driveFile.Name, directory)
-
+	if strings.Index(filename, ".pdf") > 0 && *mqttEnabled {
+		err = google.submitToPubSub(&driveFile.Id, &parentId, &filename)
+		if err != nil {
+			log.Println("Failed to submit to mqtt")
+		}
+	}
 	return nil, nil
 }
 
 // ListDirectory is the function to list directory
-func (google *googleClient) ListDirectory(directory string) (string, error) {
-	folderId, err := google.FindDir(directory)
-	if err != nil {
-		return "", err
-	}
-	parentQuery := fmt.Sprintf("'%s' in parents", folderId)
-	files, err := google.service.Files.List().Q(parentQuery).Do()
+func (google *GoogleClient) ListDirectory(directory string) (string, error) {
+	files, err := google.ListGoogleDirectory(directory)
 	if err != nil {
 		return "", err
 	}
@@ -68,8 +76,21 @@ func (google *googleClient) ListDirectory(directory string) (string, error) {
 	return directoryItems, nil
 }
 
+func (google *GoogleClient) ListGoogleDirectory(directory string) (*drive.FileList, error) {
+	folderId, err := google.FindDir(directory)
+	if err != nil {
+		return nil, err
+	}
+	parentQuery := fmt.Sprintf("'%s' in parents", folderId)
+	files, err := google.service.Files.List().Q(parentQuery).Do()
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+}
+
 // MakeDirectory is the function to mkdir in google drive
-func (google *googleClient) MakeDirectory(directory string) error {
+func (google *GoogleClient) MakeDirectory(directory string) error {
 	directories := strings.Split(directory, "/")
 	root := "root"
 	for _, dir := range directories {
@@ -95,7 +116,7 @@ func (google *googleClient) MakeDirectory(directory string) error {
 }
 
 // FindDir is the function to find dir in Google Drive
-func (google *googleClient) FindDir(directory string) (string, error) {
+func (google *GoogleClient) FindDir(directory string) (string, error) {
 	directories := strings.Split(directory, "/")
 	root := "root"
 	for _, dir := range directories {
@@ -122,7 +143,7 @@ func (google *googleClient) FindDir(directory string) (string, error) {
 }
 
 // DeleteDir is the function to rm -rf dir
-func (google *googleClient) DeleteDir(directory string) error {
+func (google *GoogleClient) DeleteDir(directory string) error {
 	dirId, err := google.FindDir(directory)
 	if err != nil {
 		if strings.Compare(err.Error(), "0 results") == 0 {
@@ -139,7 +160,7 @@ func (google *googleClient) DeleteDir(directory string) error {
 }
 
 // CleanPath is the function to clean the path that the printer sends
-func (google *googleClient) CleanPath(directory string) string {
+func (google *GoogleClient) CleanPath(directory string) string {
 	if strings.Index(directory, "\\") >= 0 {
 		directory = strings.Replace(directory, "\\", "/", -1)
 	}
@@ -149,4 +170,41 @@ func (google *googleClient) CleanPath(directory string) string {
 	}
 
 	return directory
+}
+
+func (google *GoogleClient) OCRFile(fileId string, parentId string, name string) (*drive.File, error) {
+	cmd := exec.Command("/usr/local/bin/ocrmypdf", "--force-ocr", "-", "-")
+	gFile := google.service.Files.Get(fileId)
+	dFile, err := gFile.Download()
+	b, err := io.ReadAll(dFile.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	r := bytes.NewReader(b)
+	cmd.Stdin = r
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("error: %s with output: %s", err.Error(), string(out))
+		// Lets not hold up successfully storing the non OCR file
+		return nil, nil
+	}
+	ocrReader := bytes.NewReader(out)
+	focr := &drive.File{
+		MimeType: "application/pdf",
+		Name:     fmt.Sprintf("ocr_%s", name),
+		Parents:  []string{parentId},
+	}
+	file, err := google.service.Files.Create(focr).Media(ocrReader).Do()
+	if err != nil {
+		log.Printf("error: %s with output: %s \n", err.Error(), string(out))
+		// Lets not hold up successfully storing the non OCR file
+		return nil, nil
+	}
+	log.Printf("File %s successfully uploaded in %s directory \n", focr.Name, parentId)
+	err = google.service.Files.Delete(fileId).Do()
+	if err != nil {
+		log.Printf("Unable to delete original file: %s \n", name)
+	}
+	return file, nil
 }
