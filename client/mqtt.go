@@ -19,7 +19,6 @@ var (
 	mqttServer  = flag.String("mqttServer", "tcp://broker.emqx.io:1883", "MQTT broker")
 	topic       = flag.String("topic", "go-xerox-upload/ocr", "Topic to publish to")
 	clientId    = flag.String("clientId", "go-xerox-upload", "Client Id for MQTT")
-	password    = flag.String("password", "password", "password for basic invoking")
 )
 
 type OCRMessage struct {

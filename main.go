@@ -31,7 +31,6 @@ func main() {
 	} else {
 		myRouter := mux.NewRouter().StrictSlash(true)
 		myRouter.Handle("/upload", xclient.HandleRequests(x))
-		myRouter.Handle("/ocr", xclient.HandleOCRRequest())
 		port := os.Getenv("PORT")
 		if port == "" {
 			port = "10000"

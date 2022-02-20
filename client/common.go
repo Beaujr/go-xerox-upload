@@ -1,6 +1,7 @@
 package client
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -58,6 +59,10 @@ type XeroxApi interface {
 	MakeDirectory(directory string) error
 }
 
+var (
+	password = flag.String("password", "password", "password for basic invoking")
+)
+
 // NewClient generates a new generic client for uploading
 func NewClient() (XeroxApi, error) {
 	_, found := os.LookupEnv("google")
@@ -103,49 +108,6 @@ func getEnvVar(name string) (string, error) {
 	}
 	return v, nil
 }
-func HandleOCRRequest() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, found := os.LookupEnv("cloudrun")
-		if found {
-			user, pass, ok := r.BasicAuth()
-			if !ok || user != "xerox" && pass != *password {
-				w.WriteHeader(401)
-				w.Write([]byte("Unauthorized.\n"))
-				return
-			}
-		}
-		x, err := NewGoogleClient()
-		if err != err {
-			w.WriteHeader(401)
-			w.Write([]byte("Unauthorized.\n"))
-			return
-		}
-
-		files, err := x.ListGoogleDirectory("/mail/shared/2022")
-		if err != err {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		parentId, err := x.FindDir("/mail/shared/2022")
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		for _, file := range files.Files {
-			if file.MimeType == "application/pdf" && strings.Index(file.Name, "ocr") < 0 {
-				log.Printf("OCRing %s\n", file.Name)
-				_, err := x.OCRFile(file.Id, parentId, file.Name)
-				if err != nil {
-					log.Printf("Error occurred for file %s, %s\n", file.Name, err.Error())
-				}
-			}
-		}
-		w.WriteHeader(200)
-		return
-	})
-}
 
 // HandleRequests takes the XeroxApi and handles all the List, Del, Remove, Put actions
 func HandleRequests(x XeroxApi) http.Handler {
@@ -153,7 +115,7 @@ func HandleRequests(x XeroxApi) http.Handler {
 		_, found := os.LookupEnv("cloudrun")
 		if found {
 			user, pass, ok := r.BasicAuth()
-			if !ok || user != "xerox" && pass != "5.[H]/_qpgq39[{t" {
+			if !ok || user != "xerox" && pass != *password {
 				w.WriteHeader(401)
 				w.Write([]byte("Unauthorized.\n"))
 				return
