@@ -1,7 +1,6 @@
-FROM golang:1.13.3-alpine3.10 as builder
+FROM golang:1.17-alpine as builder
 
 RUN apk update && apk add curl make git gcc cmake g++ ca-certificates
-RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 RUN mkdir -p /go/src/github.com/beaujr/go-xerox-upload
 
