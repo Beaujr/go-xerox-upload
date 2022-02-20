@@ -10,13 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build the Docker image
-      run: make docker_build
-    - name: Push the Docker image
-      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GITHUB_HEAD_REF=master
-    - name: Build the ARM Docker image
-      run: make docker_build GOARCH=arm
-    - name: Push the ARM Docker image
-      run: make docker_push DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }} GOARCH=arm GITHUB_HEAD_REF=master
-    - name: Deploy to AppEngine
-      run: make deploy GCLOUD_API_KEYFILE=${{ secrets.APPENGINE_SERVICE_ACCOUNT }} CLIENT_ID=${{ secrets.CLIENT_ID }} PROJECT_ID=${{ secrets.PROJECT_ID }} CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }} REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }} EXPIRY_TIME=${{ secrets.EXPIRY_TIME }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    - uses: docker/setup-buildx-action@v1
+      id: buildx
+      with:
+        install: true
+    - name: Docker Login
+      run: make docker-login DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }}
+    - name: build OCR Subscriber
+      run: make docker_build_ocr PUSH=true
+    - name: build server with OCR
+      run: make docker_build PUSH=true DOCKERFILES=. BUILD_TAG=ocr_pub
+    - name: build PureGo Server
+      run: make docker_build PUSH=true BUILD_TAG=latest
+#    - name: Deploy to AppEngine
+#      run: make deploy GCLOUD_API_KEYFILE=${{ secrets.APPENGINE_SERVICE_ACCOUNT }} CLIENT_ID=${{ secrets.CLIENT_ID }} PROJECT_ID=${{ secrets.PROJECT_ID }} CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }} REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }} EXPIRY_TIME=${{ secrets.EXPIRY_TIME }}

@@ -26,11 +26,11 @@ jobs:
     - name: Docker Login
       run: make docker-login DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }}
     - name: build OCR
-      run: make docker_build_ocr PUSH=true
+      run: make docker_build_ocr PUSH=false
     - name: build OCR publisher
-      run: make docker_build PUSH=true DOCKERFILES=. BUILD_TAG=ocr_pub
+      run: make docker_build PUSH=false DOCKERFILES=. BUILD_TAG=ocr_pub
     - name: build
-      run: make docker_build PUSH=true BUILD_TAG=latest
+      run: make docker_build PUSH=false BUILD_TAG=latest
 #    - name: Build the Docker image
 #      run: make docker_build
 #    - name: Build the ARM Docker image
