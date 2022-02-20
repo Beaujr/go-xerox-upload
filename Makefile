@@ -24,7 +24,10 @@ GOLDFLAGS := -ldflags "-X $(PACKAGE_NAME)/pkg/util.AppGitCommit=${GIT_COMMIT} -X
 # Alias targets
 ###############
 
-build: go_dep go_test go_upload_xerox # docker_build
+build: go_mod go_test go_upload_xerox # docker_build
+
+build_sub: go_mod go_test go_upload_xerox_sub
+
 verify: generate_verify go_verify
 #push: build docker_push
 
@@ -35,11 +38,20 @@ go_verify: go_fmt go_test
 go_dep:
 	dep ensure -v
 
+go_mod:
+	go mod vendor
+
 go_upload_xerox:
 	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
 		-a -tags netgo \
 		-o $(BINPATH)/${APP_NAME}-$(GOOS)_$(GOARCH) \
 		./
+
+go_upload_xerox_sub:
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
+    		-a -tags netgo \
+    		-o $(BINPATH)/${APP_NAME}-$(GOOS)_$(GOARCH) \
+    		./cmd/mqtt/
 
 go_test:
 ifeq ($(GOARCH),amd64)
@@ -67,13 +79,30 @@ go_fmt:
 
 # Docker targets
 ################
+docker_build: TYPE=image
 docker_build:
-	docker build \
+	docker buildx build \
+		--progress plain \
 		--build-arg VCS_REF=$(GIT_COMMIT) \
-		--build-arg GOARCH=$(GOARCH) \
-		--build-arg GOOS=$(GOOS) \
+		--platform linux/amd64,linux/aarch64 \
+		--output "type=$(TYPE),push=$(PUSH)" \
 		-t $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) \
 		-f $(DOCKERFILES)/Dockerfile \
+		./
+
+# Docker targets
+################
+docker_build_ocr: TYPE=image
+docker_build_ocr: PUSH=true
+docker_build_ocr: BUILD_TAG=ocr
+docker_build_ocr:
+	docker buildx build \
+		--progress plain \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--platform linux/amd64,linux/aarch64 \
+		--output "type=$(TYPE),push=$(PUSH)" \
+		-t $(REGISTRY)/$(APP_NAME):$(BUILD_TAG) \
+		-f $(DOCKERFILES)/Dockerfile.ocr \
 		./
 
 docker_run:

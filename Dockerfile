@@ -12,15 +12,19 @@ COPY . .
 
 ARG GOOS
 ARG GOARCH
-RUN make build GOOS=${GOOS} GOARCH=${GOARCH}
+RUN make go_mod
+RUN make go_upload_xerox GOOS=${GOOS} GOARCH=${GOARCH}
 
 RUN mv bin/beaujr/go-xerox-upload-${GOOS}_${GOARCH} bin/beaujr/go-xerox-upload
 
 FROM scratch
-
 WORKDIR /
+
+ENV PGID=1000
+ENV GID=1000
 COPY --from=builder /go/src/github.com/beaujr/go-xerox-upload/bin/beaujr/go-xerox-upload go-xerox-upload
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
+
 ENTRYPOINT ["./go-xerox-upload"]
 ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF \

@@ -1,10 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	xclient "github.com/beaujr/go-xerox-upload/client"
 	"github.com/gorilla/mux"
-	"google.golang.org/appengine"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +12,7 @@ import (
 
 func main() {
 	fmt.Println("Xerox - Go server")
+	flag.Parse()
 	x, err := xclient.NewClient()
 	if err != nil {
 		fmt.Println(err)
@@ -27,11 +28,14 @@ func main() {
 			func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(200)
 			}))
-		appengine.Main()
 	} else {
 		myRouter := mux.NewRouter().StrictSlash(true)
 		myRouter.Handle("/upload", xclient.HandleRequests(x))
-		if err := http.ListenAndServe(":10000", myRouter); err != nil {
+		port := os.Getenv("PORT")
+		if port == "" {
+			port = "10000"
+		}
+		if err := http.ListenAndServe(fmt.Sprintf(":%s", port), myRouter); err != nil {
 			log.Panic(err)
 		}
 	}

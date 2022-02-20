@@ -10,9 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Run go report card on PR
-      run: make score GITOPS_API_KEY=${{ secrets.GITOPS_API_KEY }} GITHUB_USER=gogitops GITHUB_TOKEN=${{secrets.GITHUB_API_TOKEN}}
-    - name: Build the Docker image
-      run: make docker_build
-    - name: Build the ARM Docker image
-      run: make docker_build GOARCH=arm
+    - name: GoGitOps Step
+      id: gogitops
+      uses: beaujr/gogitops-action@v0.2
+      with:
+        github-actions-token: ${{secrets.GITHUB_TOKEN}}
+#    - name: Run go report card on PR
+#      run: make score GITOPS_API_KEY=${{ secrets.GITOPS_API_KEY }} GITHUB_USER=gogitops GITHUB_TOKEN=${{secrets.GITHUB_API_TOKEN}}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    - uses: docker/setup-buildx-action@v1
+      id: buildx
+      with:
+        install: true
+    - name: Docker Login
+      run: make docker-login DOCKER_USER=beaujr DOCKER_PASS=${{ secrets.DOCKER_PASS }}
+    - name: build OCR
+      run: make docker_build_ocr PUSH=false
+    - name: build OCR publisher
+      run: make docker_build PUSH=false DOCKERFILES=. BUILD_TAG=ocr_pub
+    - name: build
+      run: make docker_build PUSH=false BUILD_TAG=latest
+#    - name: Build the Docker image
+#      run: make docker_build
+#    - name: Build the ARM Docker image
+#      run: make docker_build GOARCH=arm

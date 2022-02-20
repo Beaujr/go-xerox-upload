@@ -11,6 +11,7 @@
 # from your .gitignore file, remove the corresponding line
 # below:
 .git
+.github/
 .gitignore
 .dockerignore
 build/
@@ -20,11 +21,12 @@ Gopkg.lock
 Gopkg.toml
 credentials.json
 token.json
-Makefile
+# Makefile
 README.md
 LICENSE
 *.out
 files/
+vendor/
 
 # Binaries for programs and plugins
 *.exe
